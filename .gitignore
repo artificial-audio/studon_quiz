@@ -1,0 +1,6 @@
+*.*
+!*.py
+!*.lock
+!*.toml
+!*.md
+!.gitignore
