@@ -13,6 +13,9 @@ dependencies = [
     "qti-package-maker (>=0.8.6,<0.9.0)"
 ]
 
+[tool.poetry.scripts]
+qticonverter = "qticonverter.CLI:cli"
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
