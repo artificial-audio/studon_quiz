@@ -16,6 +16,12 @@ dependencies = [
 [tool.poetry.scripts]
 qticonverter = "qticonverter.CLI:cli"
 
+[tool.pytest]
+minversion = "9.0"
+addopts = ["-ra", "-q"]
+testpaths = [
+    "tests",
+]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
