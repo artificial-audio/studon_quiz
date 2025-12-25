@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [tool.poetry.scripts]
-qticonverter = "qticonverter.CLI:cli"
+qticonverter = "qticonverter.cli.cli_handler:cli"
 
 [tool.pytest]
 minversion = "9.0"

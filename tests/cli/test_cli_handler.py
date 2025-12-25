@@ -1,21 +1,10 @@
-# from click.testing import CliRunner
-# from qticonverter.CLI import cli
+from click.testing import CliRunner
+from qticonverter.cli.cli_handler import cli
 
-# def test_hello_world():
-#   runner = CliRunner()
-#   result = runner.invoke(cli,['initdb'])
-#   assert result.exit_code == 0
-#   assert result.output == 'Initialized the database\n'
-import click
 
-@click.group()
-def cli():
-    pass
-
-@cli.command()
-def initdb():
-    click.echo('Initialized the database')
-
-@cli.command()
-def dropdb():
-    click.echo('Dropped the database')
+def test_generate_template() -> None:
+    runner = CliRunner()
+    # result = runner.invoke(cli, ["generate-template", "--name","test.md","--q_type", "mcq-sa", "--folder", "."])
+    result = runner.invoke(cli=cli, args=["generate-template", "--name","test.md","--q_type", "mcq-sa"])
+    print(result.output)
+    assert 1==result.output
