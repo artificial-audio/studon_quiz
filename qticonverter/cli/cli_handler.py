@@ -3,6 +3,8 @@ Presents the CLI options and handles the requests by delegating to the proper fu
 """
 
 import click
+import pathlib
+from ..services.template_generation_service import TemplateGenerationService
 
 @click.group()
 def cli():
@@ -24,13 +26,13 @@ question_type_abbr = [
 
 @cli.command()
 @click.option('--name',
-              type=click.Path(exists=False,file_okay=True,dir_okay=False,writable=True),
+              type=click.Path(exists=False,file_okay=True,dir_okay=False,writable=True, path_type=pathlib.Path),
               required=True,
               help='Output filename')
 @click.option(
     "--folder",
-    type=click.Path(file_okay=False, dir_okay=True, exists=True),
-    default = '.',
+    required=True,
+    type=click.Path(file_okay=False, dir_okay=True, exists=True, path_type=pathlib.Path),
     help="Path to save the Question file"
 )
 @click.option('--q_type',
@@ -38,7 +40,7 @@ question_type_abbr = [
               required=True,
               help='Type of quesiton template needed')
 
-def generate_template(name:click.Path,folder: click.Path, q_type: click.Choice[str]):
+def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Choice[str]):
     """Generate the template file
 
     Args:
@@ -46,4 +48,6 @@ def generate_template(name:click.Path,folder: click.Path, q_type: click.Choice[s
         folder (click.Path): _description_
         q_type (click.Choice[str]): _description_
     """
-    click.echo(message=f'Template for {q_type} created at {folder} {name}')
+    service = TemplateGenerationService(f_name=folder.joinpath(name).resolve(), q_type=q_type)
+    if service.generate_template() == False:
+        raise click.ClickException("Error Generating the Template")
