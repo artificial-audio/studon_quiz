@@ -28,7 +28,7 @@ where $$A$$ is a constant matrix?
 ### Correct Answer (Optional)
 The product $$Ax$$ represents a linear transformation applied to the vector $$x$$.
 
-### At least one incorrect Answer (Optional)
+### Wrong Answer(Optional)
 Feedback for incorrect answer
 
 ## Hint (Optional)

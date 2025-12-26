@@ -153,5 +153,42 @@ class MarkdownReader:
         return dictData
 
 
-    def _get_feedback(self):
-        pass
+    def get_feedback(self):
+        level = 2
+        feedback = {}
+        recordFeedback = False
+        pattern = r'feedback'
+        patternRightFeedback = r'Correct'
+        patternWrongFeedback = r'Wrong'
+        nextFeedbackType = None
+        content = []
+        for element in self._ast_tree:
+            if(element['type'] == 'heading' and element['attrs']['level'] == level and re.search(pattern, element['children'][0]['raw'], re.IGNORECASE)):
+                recordFeedback = True
+                continue
+            if recordFeedback == True and element['type'] == 'heading' and element['attrs']['level'] <= level:
+                if nextFeedbackType is not None:
+                    feedback[nextFeedbackType]=self._ast_to_text(content)
+                break
+            if recordFeedback == True:
+                if(element['type'] == 'heading' and re.search(patternRightFeedback, element['children'][0]['raw'], re.IGNORECASE)):
+                    if nextFeedbackType is not None:
+                        feedback[nextFeedbackType]=self._ast_to_text(content)
+                    nextFeedbackType = "Correct"
+                    content = []
+                    continue
+                elif(element['type'] == 'heading' and re.search(patternWrongFeedback, element['children'][0]['raw'], re.IGNORECASE)):
+                    if nextFeedbackType is not None:
+                        feedback[nextFeedbackType]=self._ast_to_text(content)
+                    nextFeedbackType = "Wrong"
+                    content = []
+                    continue
+                if nextFeedbackType is not None:
+                    try:
+                        if(element['type'] == 'blank_line'):
+                            content.append({'type':'linebreak'})
+                        else:
+                            content.extend(element['children'])
+                    except:
+                        pass
+        return feedback
