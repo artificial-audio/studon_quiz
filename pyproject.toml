@@ -17,6 +17,10 @@ dependencies = [
 [tool.poetry.scripts]
 qticonverter = "qticonverter.cli.cli_handler:cli"
 
+[tool.poetry]
+include = ["qticonverter/markdown_template/*.md"]
+
+
 [tool.pytest]
 minversion = "9.0"
 addopts = ["-ra", "-q"]

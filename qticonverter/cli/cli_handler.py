@@ -48,6 +48,6 @@ def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Cho
         folder (click.Path): _description_
         q_type (click.Choice[str]): _description_
     """
-    service = TemplateGenerationService(f_name=folder.joinpath(name).resolve(), q_type=q_type)
+    service = TemplateGenerationService(f_name=folder.joinpath(name).resolve(), q_type=str(q_type))
     if service.generate_template() == False:
         raise click.ClickException("Error Generating the Template")

@@ -1,2 +1,2 @@
-class TemplateGenerationService:
-    pass
+import pytest
+
