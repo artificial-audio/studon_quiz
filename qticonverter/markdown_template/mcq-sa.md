@@ -1,10 +1,8 @@
 type: mcq-sa
 
-
 # Matrix–Vector Multiplication
 Short description. This is not displayed in the presentation of the question
 ## Quiz
-Detailed Description of the question
 What is the result of the matrix–vector multiplication  
 $$
 y = Ax
