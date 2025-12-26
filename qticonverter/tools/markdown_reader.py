@@ -192,3 +192,38 @@ class MarkdownReader:
                     except:
                         pass
         return feedback
+
+    def get_hint(self):
+        level = 2
+        hint = {'penalty':0}
+        recordHint = False
+        pattern = r'hint'
+        content = []
+        nextFieldType = 'hint'
+        patternPenalty = r'Penalty'
+        for element in self._ast_tree:
+            if(element['type'] == 'heading' and element['attrs']['level'] == level and re.search(pattern, element['children'][0]['raw'], re.IGNORECASE)):
+                recordHint = True
+                continue
+            if recordHint == True:
+                if(element['type'] == 'heading' and re.search(patternPenalty, element['children'][0]['raw'], re.IGNORECASE)):
+                    if nextFieldType is not None:
+                        hint[nextFieldType]=self._ast_to_text(content)
+                    nextFieldType = "penalty"
+                    content = []
+                    continue
+                if(element['type'] == 'heading' and nextFieldType == 'penalty'):
+                    break
+                if recordHint:
+                    try:
+                        if(element['type'] == 'blank_line'):
+                            content.append({'type':'linebreak'})
+                        else:
+                            content.extend(element['children'])
+                    except:
+                        pass
+        if content:
+            hint[nextFieldType] = self._ast_to_text(content)
+        if isinstance(hint['penalty'],str):
+            hint['penalty'] = int(hint['penalty'].lstrip())
+        return hint

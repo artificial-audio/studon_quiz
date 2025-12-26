@@ -69,3 +69,9 @@ def test_markdown_reader_get_feedback() -> None:
     reader = MarkdownReader(str(file))
     feedback = reader.get_feedback()
     assert type(feedback) == dict
+
+def test_markdown_reader_get_hint() -> None:
+    file = pkg_resources.files("qticonverter")/"markdown_template/mcq-sa.md"
+    reader = MarkdownReader(str(file))
+    hint = reader.get_hint()
+    assert type(hint) == dict
