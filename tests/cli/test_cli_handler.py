@@ -55,7 +55,7 @@ def test_convert_single_service_wrong_input(tmp_path: Path) -> None:
 def test_convert_single_service(create_template_file, tmp_path: Path) -> None:
     runner = CliRunner()
     inputFile = tmp_path/'test.md'
-    outputFile = tmp_path/'output.xml'
+    outputFile = tmp_path/'output.zip'
     
     result = runner.invoke(cli, ["convert-single", "--input", str(inputFile), "--output", str(outputFile)])
     assert outputFile.exists()

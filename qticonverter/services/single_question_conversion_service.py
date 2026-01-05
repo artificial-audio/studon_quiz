@@ -25,6 +25,7 @@ class SingleQuestionConversionService:
     
 
     def convert(self) -> bool:
+        success = True
         options = [option['ans'] for option in self.question['options']]
         for option in self.question['options']:
             if option['Score'] == '1':
@@ -39,4 +40,8 @@ class SingleQuestionConversionService:
             answer_text= correct_answer
         )
 
-        self.converter.save_package()
+        try:
+            self.converter.save_package()
+        except Exception as e:
+            success = False
+        return success
