@@ -1,29 +1,16 @@
-# from qti_package_maker.package_interface import QTIPackageInterface
-
-# def example():
-#     # Initialize the package with a name
-#     qti_packer = QTIPackageInterface("example_assessment", verbose=True)
-
-#     # Add a multiple-choice question
-#     qti_packer.add_item("MC", (
-# 	    "What is your favorite color?",
-# 	    ["blue", "red", "yellow"],
-# 	    "blue",
-#     ))
-
-#     # # Add a multiple-answer question
-#     # qti_packer.add_item("MA", (
-#     # 	"Which of these are fruits?",
-#     # 	["apple", "carrot", "banana", "broccoli"],
-#     # 	["apple", "banana"],
-#     # ))
+from qticonverter.tools.qti_converter import QtiConverter
+from pathlib import Path
 
 
-#     # Save as Canvas QTI v1.2
-#     qti_packer.save_package("canvas_qti_v1_2")
-
-#     # Save as Blackboard QTI v2.1
-#     qti_packer.save_package("blackboard_qti_v2_1")
-
-class QtiConverter:
-    pass
+def test_qti_converter_save_package(tmp_path: Path):
+    output_file_path = tmp_path / "output"
+    converter = QtiConverter(output_file_path)
+    
+    question_text = "What is the capital of France?"
+    choices_list = ["Berlin", "Madrid", "Paris"]
+    answer_text = "Paris"
+    
+    converter.add_multiple_choice(question_text=question_text, choices_list=choices_list, answer_text=answer_text)
+    
+    converter.save_package()
+    assert output_file_path.exists()
