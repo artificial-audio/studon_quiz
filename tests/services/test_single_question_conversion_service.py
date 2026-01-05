@@ -5,9 +5,7 @@ import importlib.resources as pkg_resources
 def test_single_question_conversion_service(tmp_path: Path) -> None:
     inputFile = pkg_resources.files("qticonverter")/"markdown_template/mcq-sa.md"
     assert Path(inputFile).exists()
-    outputFile = tmp_path/'output.xml'
+    outputFile = tmp_path/'output.zip'
     service = SingleQuestionConversionService(input_file=inputFile, output_file=outputFile)
-    # service.convert()
-    
-    # assert outputFile.exists()
-    # content = outputFile.read_text()
+    service.convert()
+    assert outputFile.exists()

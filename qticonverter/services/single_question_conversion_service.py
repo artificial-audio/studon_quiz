@@ -1,10 +1,12 @@
 import pathlib
 from ..tools.markdown_reader import MarkdownReader
+from qticonverter.tools.qti_converter import QtiConverter
 
 class SingleQuestionConversionService:
     def __init__(self, input_file: pathlib.Path, output_file: pathlib.Path):
         self.input_file = input_file
         self.output_file = output_file
+        self.converter = QtiConverter(output_path=output_file)
         self.reader = MarkdownReader(str(self.input_file))
         attr = self.reader.get_attrs()
         if 'type' not in attr:
@@ -23,17 +25,18 @@ class SingleQuestionConversionService:
     
 
     def convert(self) -> bool:
-        # Placeholder for conversion logic
-        try:
-            with open(self.input_file, 'r') as infile:
-                content = infile.read()
-                # Conversion logic would go here
-                converted_content = f"<converted>{content}</converted>"
+        options = [option['ans'] for option in self.question['options']]
+        for option in self.question['options']:
+            if option['Score'] == '1':
+                correct_answer = option['ans']
+                break
+        question = self.question["problem_statement"]
+        # remove non ascii characters
+        question = ''.join([i if ord(i) < 128 else ' ' for i in question])
+        self.converter.add_multiple_choice(
+            question_text=question,
+            choices_list= options,
+            answer_text= correct_answer
+        )
 
-            with open(self.output_file, 'w') as outfile:
-                outfile.write(converted_content)
-
-            return True
-        except Exception as e:
-            print(f"An error occurred during conversion: {e}")
-            return False
+        self.converter.save_package()

@@ -7,7 +7,7 @@ What is the result of the matrix–vector multiplication
 $$
 y = Ax
 $$
-where $$A$$ is a constant matrix?
+where $A$ is a constant matrix?
 
 ## Options
 
