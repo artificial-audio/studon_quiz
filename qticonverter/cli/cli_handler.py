@@ -2,10 +2,33 @@
 Presents the CLI options and handles the requests by delegating to the proper function
 """
 
+from itertools import count
 import click
 import pathlib
+from loguru import logger
+import sys
 from ..services.template_generation_service import TemplateGenerationService
 from ..services.single_question_conversion_service import SingleQuestionConversionService 
+
+def set_verbosity_level(verbose: int):
+    """Sets the verbosity level for logging
+
+    Args:
+        verbose (int): Verbosity level
+    """
+        # trace, debug, info, success, warning, error, critical
+    logger.remove()
+    if verbose == 0:
+        logger.add(sink=sys.stderr,level="WARNING")
+    elif verbose == 1:
+        logger.add(sink=sys.stderr,level="INFO")
+        click.echo("Verbosity set to INFO")
+    elif verbose == 2:
+        logger.add(sink=sys.stderr,level="DEBUG")
+        click.echo("Verbosity set to DEBUG")
+    else:
+        logger.add(sink=sys.stderr,level="TRACE")
+        click.echo("Verbosity set to TRACE")
 
 @click.group()
 def cli():
@@ -41,7 +64,8 @@ question_type_abbr = [
               required=True,
               help='Type of quesiton template needed')
 
-def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Choice[str]):
+@click.option('-v','--verbose',count=True, help='Enables verbose mode', required=False)
+def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Choice[str], verbose: int):
     """Generate the template file
 
     Args:
@@ -49,6 +73,8 @@ def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Cho
         folder (click.Path): _description_
         q_type (click.Choice[str]): _description_
     """
+    set_verbosity_level(verbose)
+    
     service = TemplateGenerationService(f_name=folder.joinpath(name).resolve(), q_type=str(q_type))
     if service.generate_template() == False:
         raise click.ClickException("Error Generating the Template")
@@ -64,13 +90,15 @@ def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Cho
               required=False,
               help='Output file to convert to')
 
-def convert_single(input: pathlib.Path, output = pathlib.Path('.')):  
+@click.option('-v','--verbose',count=True, help='Enables verbose mode', required=False)
+def convert_single(input: pathlib.Path,verbose: int, output = pathlib.Path('.') ):  
     """Convert a single file
 
     Args:
         input (click.Path): Input file path
         output (click.Path, optional): Output file path. Defaults to pathlib.Path('.').
     """
+    set_verbosity_level(verbose)
     if not input.suffix == '.md':
         raise click.ClickException("Input file must be a Markdown (.md) file")
         if output == pathlib.Path('.'):
