@@ -2,7 +2,6 @@
 Presents the CLI options and handles the requests by delegating to the proper function
 """
 
-from itertools import count
 import click
 import pathlib
 from loguru import logger
@@ -16,18 +15,22 @@ def set_verbosity_level(verbose: int):
     Args:
         verbose (int): Verbosity level
     """
-        # trace, debug, info, success, warning, error, critical
+    # trace, debug, info, success, warning, error, critical
     logger.remove()
     if verbose == 0:
-        logger.add(sink=sys.stderr,level="WARNING")
+        logger.add(sink=sys.stderr, level="WARNING")
+        logger.info("Verbosity set to WARNING")
     elif verbose == 1:
-        logger.add(sink=sys.stderr,level="INFO")
+        logger.add(sink=sys.stderr, level="INFO")
+        logger.info("Verbosity set to INFO")
         click.echo("Verbosity set to INFO")
     elif verbose == 2:
-        logger.add(sink=sys.stderr,level="DEBUG")
+        logger.add(sink=sys.stderr, level="DEBUG")
+        logger.debug("Verbosity set to DEBUG")
         click.echo("Verbosity set to DEBUG")
     else:
-        logger.add(sink=sys.stderr,level="TRACE")
+        logger.add(sink=sys.stderr, level="TRACE")
+        logger.trace("Verbosity set to TRACE")
         click.echo("Verbosity set to TRACE")
 
 @click.group()
@@ -74,10 +77,14 @@ def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Cho
         q_type (click.Choice[str]): _description_
     """
     set_verbosity_level(verbose)
+    logger.info(f"Generating template: {name} in folder: {folder} for type: {q_type}")
     
     service = TemplateGenerationService(f_name=folder.joinpath(name).resolve(), q_type=str(q_type))
     if service.generate_template() == False:
+        logger.error(f"Failed to generate template: {name}")
         raise click.ClickException("Error Generating the Template")
+    
+    logger.info(f"Successfully generated template at: {folder.joinpath(name).resolve()}")
 
 
 @cli.command()
@@ -99,12 +106,20 @@ def convert_single(input: pathlib.Path,verbose: int, output = pathlib.Path('.') 
         output (click.Path, optional): Output file path. Defaults to pathlib.Path('.').
     """
     set_verbosity_level(verbose)
+    logger.info(f"Starting conversion of file: {input}")
+    
     if not input.suffix == '.md':
+        logger.error(f"Invalid file format: {input.suffix}. Expected .md file")
         raise click.ClickException("Input file must be a Markdown (.md) file")
-        if output == pathlib.Path('.'):
-            output = pathlib.Path(input.stem + '.xml')
-        
-    else:
-        service = SingleQuestionConversionService(input_file=input, output_file=output)
-        if not service.convert():
-            raise click.ClickException("Error converting the file")
+    
+    if output == pathlib.Path('.') or output is None:
+        output = pathlib.Path(input.stem + '.zip')
+        logger.info(f"Output file not specified, using default: {output}")
+    
+    logger.info(f"Converting {input} to {output}")
+    service = SingleQuestionConversionService(input_file=input, output_file=output)
+    if not service.convert():
+        logger.error(f"Conversion failed for file: {input}")
+        raise click.ClickException("Error converting the file")
+    
+    logger.info(f"Successfully converted file to: {output}")
