@@ -19,14 +19,12 @@ class QuestionBank:
         "mcq-ma",   # multiple choice (multiple answers)
     ]
     _instance = None
-    questions: list = None
     converter: QtiConverter = None
     
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.questions = []
             cls._instance.converter = QtiConverter()
         return cls._instance
     
