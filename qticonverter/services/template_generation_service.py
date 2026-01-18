@@ -5,6 +5,7 @@ import importlib.resources as pkg_resources
 
 class TemplateGenerationService:
     _questionTemplates = {"mcq-sa": pkg_resources.files("qticonverter") / "markdown_template/mcq-sa.md"}
+    _questionTemplates = {"mcq-ma": pkg_resources.files("qticonverter") / "markdown_template/mcq-ma.md"}
     
     def __init__(self, f_name: Path, q_type: str) -> None:
         self._f_name = f_name
