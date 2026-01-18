@@ -10,7 +10,7 @@ def test_qti_converter_save_package(tmp_path: Path):
     choices_list = ["Berlin", "Madrid", "Paris"]
     answer_text = "Paris"
     
-    converter.add_multiple_choice(question_text=question_text, choices_list=choices_list, answer_text=answer_text)
+    converter.add_multiple_choice_SA(question_text=question_text, choices_list=choices_list, answer_text=answer_text)
     
     converter.save_package(output_file_path)
     assert output_file_path.exists()

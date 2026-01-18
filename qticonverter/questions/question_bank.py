@@ -55,33 +55,42 @@ class QuestionBank:
             'hint': self.reader.get_hint()
         }
         logger.info("Loaded question attributes: {}", question)
-        if question['type'] == 'mcq-sa':
-            self._add_mcq_sa_question(question)
+        if question['type'] == 'mcq-sa' or question['type'] == 'mcq-ma':
+            self._add_mcq_question(question)
     
-    def _add_mcq_sa_question(self, question):
+    def _add_mcq_question(self, question):
+        correct_answer = []
         options = [option['ans'] for option in question['options']]
         logger.info("Extracted options: {}", options)
 
         for option in question['options']:
-            if option['Score'] == '1':
-                correct_answer = option['ans']
+            option['Score'] = float(option['Score'])
+            if option['Score'] != 0:
+                correct_answer.append(option['ans'])
                 logger.info("Identified correct answer: {}", correct_answer)
-                break
-        else:
+        if not correct_answer:
             logger.warning("No correct answer found in options.")
             correct_answer = None
 
-        question = question["problem_statement"]
+        question_statement = question["problem_statement"]
         # remove non ascii characters
-        question = ''.join([i if ord(i) < 128 else ' ' for i in question])
-        logger.info("Processed question text: {}", question)
+        question_statement = ''.join([i if ord(i) < 128 else ' ' for i in question_statement])
+        logger.info("Processed question text: {}", question_statement)
 
 
-        self.converter.add_multiple_choice(
-            question_text=question,
-            choices_list=options,
-            answer_text=correct_answer
-        )
+        if question['type'] == 'mcq-sa':
+            correct_answer = correct_answer[0] if correct_answer else None
+            self.converter.add_multiple_choice_SA(
+                question_text=question_statement,
+                choices_list=options,
+                answer_text=correct_answer
+            )
+        else:
+            self.converter.add_multiple_choice_MA(
+                question_text=question_statement,
+                choices_list=options,
+                answer_text=correct_answer
+            )
 
     def save_package(self, output_path:pathlib.Path) -> bool:
         success = True
