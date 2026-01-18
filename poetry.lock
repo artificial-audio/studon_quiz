@@ -1057,14 +1057,14 @@ cffi = {version = "*", markers = "implementation_name == \"pypy\""}
 
 [[package]]
 name = "qti-package-maker"
-version = "0.8.6"
+version = "26.1rc4"
 description = "A package to create, manage, and convert QTI packages for quizzes and assessments in Canvas, Blackboard, Moodle, and LibreTexts ADAPT."
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "qti_package_maker-0.8.6-py3-none-any.whl", hash = "sha256:24c410441eb4a7df1a9ef5a439452829a027c2cab37d42d29255d4d4470685bb"},
-    {file = "qti_package_maker-0.8.6.tar.gz", hash = "sha256:ff62666174942b4bfeb8aa0eae5d9ea11cb277933e0e1cc6bdb48ea1c7b9e16a"},
+    {file = "qti_package_maker-26.1rc4-py3-none-any.whl", hash = "sha256:4a867f5eca8fe3f95416ab258f23f13ab8390e965945be21a799acfba5090a3f"},
+    {file = "qti_package_maker-26.1rc4.tar.gz", hash = "sha256:19c5bbb8c3b6d134ad473ad88a56549c26511959db5a63a422600ae3bfd9b4f0"},
 ]
 
 [package.dependencies]
@@ -1190,4 +1190,4 @@ dev = ["black (>=19.3b0) ; python_version >= \"3.6\"", "pytest (>=4.6.2)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<4.0"
-content-hash = "2a6e3e680feb740dc04173bd3ec96835c07c754695abbe353606bdcd24831282"
+content-hash = "72405a4f9c9bffb3927ffa8620f0a93b396070befe9d3b802e680ce186d62288"

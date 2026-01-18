@@ -10,12 +10,15 @@ requires-python = ">=3.13,<4.0"
 dependencies = [
     "click (>=8.3.1,<9.0.0)",
     "mistune (>=3.1.4,<4.0.0)",
-    "qti-package-maker (>=0.8.6,<0.9.0)",
+    "qti-package-maker (>=26.1rc4,<27.0)",
     "loguru (>=0.7.3,<0.8.0)"
 ]
 
 [tool.poetry.scripts]
 qticonverter = "qticonverter.cli.cli_handler:cli"
+
+[tool.poetry.dependencies]
+qti-package-maker = {allow-prereleases = true}
 
 [tool.poetry]
 include = ["qticonverter/markdown_template/*.md"]
