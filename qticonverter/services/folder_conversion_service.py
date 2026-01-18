@@ -13,7 +13,7 @@ class FolderConversionService:
         if not self.source_folder.exists():
             raise ValueError(f"Source folder does not exist: {self.source_folder}")
         
-        files = self.source_folder.glob(pattern="*.md")
+        files = self.source_folder.glob('*.md')
         
         for file_path in files:
             if file_extension is None or file_path.suffix == file_extension:
