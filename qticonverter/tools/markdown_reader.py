@@ -78,6 +78,8 @@ class MarkdownReader:
                 retStr += '\n'
             elif node['type'] == 'list_item':
                 retStr += self._unwrap_list_to_text(node, 0)
+            elif node['type'] == 'inline_html':
+                retStr += node['raw']
         return retStr
 
     def _unwrap_list_to_text(self, node: Dict[str, Any], tabCount: int) -> str:
