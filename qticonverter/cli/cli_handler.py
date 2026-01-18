@@ -8,6 +8,7 @@ from loguru import logger
 import sys
 from ..services.template_generation_service import TemplateGenerationService
 from ..services.single_question_conversion_service import SingleQuestionConversionService 
+from ..services.folder_conversion_service import FolderConversionService
 
 def set_verbosity_level(verbose: int):
     """Sets the verbosity level for logging
@@ -123,3 +124,38 @@ def convert_single(input: pathlib.Path,verbose: int, output = pathlib.Path('.') 
         raise click.ClickException("Error converting the file")
     
     logger.info(f"Successfully converted file to: {output}")
+
+
+@cli.command()
+@click.option('--input',
+              type=click.Path(exists=True,file_okay=False,dir_okay=True,readable=True, path_type=pathlib.Path),
+              required=True,
+              help='Input folder to convert')
+@click.option('--output',
+              type=click.Path(exists=False,file_okay=True,dir_okay=False,writable=True, path_type=pathlib.Path),
+              required=False,
+              help='Output file to convert to')
+
+@click.option('-v','--verbose',count=True, help='Enables verbose mode', required=False)
+def convert_folder(input: pathlib.Path,verbose: int, output = pathlib.Path('.') ):  
+    """Convert all files in a folder
+
+    Args:
+        input (click.Path): Input folder path
+        output (click.Path, optional): Output file path. Defaults to pathlib.Path('.').
+    """
+    set_verbosity_level(verbose)
+    logger.info(f"Starting conversion of file: {input}")
+    
+    
+    if output == pathlib.Path('.') or output is None:
+        output = pathlib.Path(input.stem + '.zip')
+        logger.info(f"Output file not specified, using default: {output}")
+    
+    logger.info(f"Converting files in {input} to {output}")
+    service = FolderConversionService(source_folder=input, output_file=output)
+    if not service.convert():
+        logger.error(f"Conversion failed for file: {input}")
+        raise click.ClickException("Error converting the file")
+    
+    logger.info(f"Successfully converted files to: {output}")

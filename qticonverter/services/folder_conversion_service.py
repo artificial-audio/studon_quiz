@@ -7,7 +7,7 @@ class FolderConversionService:
         self.source_folder = source_folder
         self.output_file = output_file
 
-    def convert(self, file_extension: Optional[str] = None) -> List[str]:
+    def convert(self, file_extension: Optional[str] = None) -> bool:
         qb = QuestionBank()
         
         if not self.source_folder.exists():
@@ -21,4 +21,4 @@ class FolderConversionService:
                     qb.add_question(file_path)
                 except Exception as e:
                     print(f"Error converting {file_path}: {e}")
-        qb.save_package(self.output_file)
+        return qb.save_package(self.output_file)
