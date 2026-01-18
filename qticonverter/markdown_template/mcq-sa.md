@@ -7,7 +7,8 @@ What is the result of the matrix–vector multiplication
 $$
 y = Ax
 $$
-where $A$ is a constant matrix?
+
+where <span class="latex">A^2 </span> is a constant matrix?
 
 ## Options
 
