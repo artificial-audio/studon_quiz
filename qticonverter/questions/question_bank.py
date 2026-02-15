@@ -1,7 +1,8 @@
 from loguru import logger
-from mcq_sa_question import McqSAQuestion
+from .mcq_sa_question import McqSAQuestion
 from qticonverter.tools.qti_converter import QtiConverter
 from qticonverter.tools.markdown_reader import MarkdownReader
+from qticonverter.questions.qti_writer import QTIWriter
 import pathlib
 
 
@@ -20,6 +21,7 @@ class QuestionBank:
         "mcq-ma",   # multiple choice (multiple answers)
     ]
     _instance = None
+    questions = []
     converter: QtiConverter = None
     
 
@@ -61,42 +63,30 @@ class QuestionBank:
     
     def _add_mcq_question(self, question):
         correct_answer = []
-        options = [option['ans'] for option in question['options']]
+        options = [{"text": option['ans'], "score": float(option['Score']), "feedback": option.get('feedback', '')} for option in question['options']]
         logger.info("Extracted options: {}", options)
 
-        for option in question['options']:
-            option['Score'] = float(option['Score'])
-            if option['Score'] != 0:
-                correct_answer.append(option['ans'])
-                logger.info("Identified correct answer: {}", correct_answer)
-        if not correct_answer:
-            logger.warning("No correct answer found in options.")
-            correct_answer = None
 
         question_statement = question["problem_statement"]
         # remove non ascii characters
         question_statement = ''.join([i if ord(i) < 128 else ' ' for i in question_statement])
         logger.info("Processed question text: {}", question_statement)
 
-
         if question['type'] == 'mcq-sa':
-            correct_answer = correct_answer[0] if correct_answer else None
-            self.converter.add_multiple_choice_SA(
-                question_text=question_statement,
-                choices_list=options,
-                answer_text=correct_answer
-            )
-        else:
-            self.converter.add_multiple_choice_MA(
-                question_text=question_statement,
-                choices_list=options,
-                answer_text=correct_answer
-            )
+            q = McqSAQuestion()
+            q.set_title(title=question['title'])
+            q.set_problem_statement(question_statement)
+            q.set_options(options)  
+            q.set_summary(question['summary'])
+            q.set_feedback(question['feedback'])
+            q.set_hint(question['hint'])
+            self.questions.append(q)
 
-    def save_package(self, output_path:pathlib.Path) -> bool:
+    def save_package(self, output_path: pathlib.Path) -> bool:
         success = True
         try:
-            self.converter.save_package(output_path=output_path)
+            writer = QTIWriter(self.questions)
+            writer.write(self.questions, output_path)
             logger.info("Successfully saved the package.")
         except Exception as e:
             logger.error("Failed to save the package: {}", e)
