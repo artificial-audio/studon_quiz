@@ -14,7 +14,8 @@ def test_question_bank_conversion_sa(tmp_path) -> None:
     question_bank = QuestionBank()
     question_bank.add_question(inputFile)
     question_bank.save_package(output_path=outputFile)
-    assert outputFile.exists(), "Output package was not created"
+    newPath = outputFile.parent /(outputFile.stem+'__qpl.zip')
+    assert newPath.exists()
 
 def test_question_bank_conversion_ma(tmp_path) -> None:
     inputFile = pkg_resources.files("qticonverter")/"markdown_template/mcq-ma.md"
@@ -23,4 +24,5 @@ def test_question_bank_conversion_ma(tmp_path) -> None:
     question_bank = QuestionBank()
     question_bank.add_question(inputFile)
     question_bank.save_package(output_path=outputFile)
-    assert outputFile.exists(), "Output package for mcq-ma was not created"
+    newPath = outputFile.parent /(outputFile.stem+'__qpl.zip')
+    assert newPath.exists()

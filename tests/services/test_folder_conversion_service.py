@@ -7,4 +7,5 @@ def test_folder_conversion_service(tmp_path: Path) -> None:
     outputFile = tmp_path/'output.zip'
     service = FolderConversionService(source_folder=inputFolder, output_file=outputFile)
     service.convert()
-    assert outputFile.exists()
+    newPath = outputFile.parent /(outputFile.stem+'__qpl.zip')
+    assert newPath.exists()

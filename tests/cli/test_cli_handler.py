@@ -66,7 +66,8 @@ def test_convert_single_service(create_template_file, tmp_path: Path) -> None:
     outputFile = tmp_path/'output.zip'
     
     result = runner.invoke(cli, ["convert-single", "--input", str(inputFile), "--output", str(outputFile)])
-    assert outputFile.exists()
+    newPath = outputFile.parent /(outputFile.stem+'__qpl.zip')
+    assert newPath.exists()
     assert 0==result.exit_code
 
 def test_convert_folder_service_call(create_mulitple_template_file, tmp_path: Path) -> None:
@@ -76,5 +77,6 @@ def test_convert_folder_service_call(create_mulitple_template_file, tmp_path: Pa
     outputFile = tmp_path/'output.zip'
     
     result = runner.invoke(cli, ["convert-folder", "--input", str(inputFolder), "--output", str(outputFile)])
-    assert outputFile.exists()
+    newPath = outputFile.parent /(outputFile.stem+'__qpl.zip')
+    assert newPath.exists()
     assert 0==result.exit_code

@@ -22,8 +22,7 @@ def test_qti_writer_creates_xml(tmp_path):
     writer = QTIWriter([q])
     
     output_file = tmp_path / "test_qti.xml"
-    output_file = '/home/bharad/Work/FAU/QTIConverter/temp/demo/test_qti.xml'  # replace with tmp_path / "test_qti.xml" for actual test
-    writer.write_xml(str(output_file))
+    writer.write_qti(str(output_file))
     
     # Check file was created
     assert output_file.exists()
