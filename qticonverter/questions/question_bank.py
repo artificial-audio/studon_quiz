@@ -1,4 +1,5 @@
 from loguru import logger
+from mcq_sa_question import McqSAQuestion
 from qticonverter.tools.qti_converter import QtiConverter
 from qticonverter.tools.markdown_reader import MarkdownReader
 import pathlib
