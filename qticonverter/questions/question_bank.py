@@ -86,7 +86,7 @@ class QuestionBank:
         success = True
         try:
             writer = QTIWriter(self.questions)
-            writer.write(self.questions, output_path)
+            writer.write_ilias_zip( output_path)
             logger.info("Successfully saved the package.")
         except Exception as e:
             logger.error("Failed to save the package: {}", e)

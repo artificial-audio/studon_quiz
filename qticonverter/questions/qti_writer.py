@@ -1,4 +1,6 @@
 from lxml import etree
+import zipfile
+from pathlib import Path
 
 class QTIWriter:
     def __init__(self, questions, author="Bharadwaj Lakuduva Suresh Babu", ilias_version="9.16.0"):
@@ -89,7 +91,7 @@ class QTIWriter:
             feedbacks.append(itemfeedback)
         return feedbacks
 
-    def write_xml(self, output_file="output.xml"):
+    def write_qti(self, output_file="output"):
         root = etree.Element("questestinterop")
 
         for q_idx, question in enumerate(self.questions):
@@ -115,5 +117,39 @@ class QTIWriter:
 
         tree = etree.ElementTree(root)
         tree.write(output_file, encoding="UTF-8", xml_declaration=True, pretty_print=True)
-        
-        
+
+    # def write_ilias_zip(self, zip_name="export", output_dir="."):
+    def write_ilias_zip(self, output_file="output"):
+        """
+        Writes the QTI XML into an ILIAS-compatible ZIP file:
+        - objects/ folder (empty)
+        - <zip_name>__qpl.xml (empty)
+        - <zip_name>__qti.xml (contains the full XML)
+        """
+        output_dir = Path(output_file).parent
+        package_name = output_file.stem + '__qpl'
+        zip_path = output_dir / f"{package_name}.zip"
+
+        # Generate QTI XML to a temporary file
+        qti_file_name = f"{output_file.stem}__qti.xml"
+        temp_qti_path = output_dir / qti_file_name
+        self.write_qti(str(temp_qti_path))
+
+        # Create the ZIP archive
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            # Empty objects folder
+            zf.writestr(f"{package_name}/objects/", "")
+            
+            # Empty QPL file
+            zf.writestr(f"{package_name}/{output_file.stem}__qpl.xml", "")
+            
+            # QTI XML file
+            with open(temp_qti_path, "rb") as f:
+                zf.writestr(f"{package_name}/{qti_file_name}", f.read())
+
+        #  Remove temporary XML
+        temp_qti_path.unlink()
+
+        print(f"Created ILIAS ZIP: {zip_path}")
+        return zip_path
+
