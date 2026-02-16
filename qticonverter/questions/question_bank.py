@@ -63,7 +63,7 @@ class QuestionBank:
     
     def _add_mcq_question(self, question):
         correct_answer = []
-        options = [{"text": option['ans'], "score": float(option['Score']), "feedback": option.get('feedback', '')} for option in question['options']]
+        options = [{"text": option['ans'], "score": float(option['Score']), "feedback": option.get('Remark', '')} for option in question['options']]
         logger.info("Extracted options: {}", options)
 
 

@@ -91,6 +91,36 @@ class QTIWriter:
             feedbacks.append(itemfeedback)
         return feedbacks
 
+    def _create_feedbackOverall(self, question):
+        feedbacks = []
+        feedback = question.get_feedback()
+        if 'Correct' in feedback:
+            correct_feedback = feedback['Correct']
+            itemfeedback_correct = etree.Element("itemfeedback", ident="response_allcorrect", view="All")
+            flow_mat_correct = etree.SubElement(itemfeedback_correct, "flow_mat")
+            material_correct = etree.SubElement(flow_mat_correct, "material")
+            etree.SubElement(material_correct, "mattext", texttype="text/xhtml").text = f"<p>{correct_feedback}</p>"
+            feedbacks.append(itemfeedback_correct)
+
+        if 'Wrong' in feedback:
+            wrong_feedback = feedback['Wrong']
+            itemfeedback_wrong = etree.Element("itemfeedback", ident="response_onenotcorrect", view="All")
+            flow_mat_wrong = etree.SubElement(itemfeedback_wrong, "flow_mat")
+            material_wrong = etree.SubElement(flow_mat_wrong, "material")
+            etree.SubElement(material_wrong, "mattext", texttype="text/xhtml").text = f"<p>{wrong_feedback}</p>"
+            feedbacks.append(itemfeedback_wrong)
+        return feedbacks
+    
+    def _create_hint(self, question):
+        hint_data = question.get_hint()
+        hint = hint_data.get('hint') if isinstance(hint_data, dict) else None
+        penalty_points = hint_data.get('penalty', 0) if isinstance(hint_data, dict) else 0
+        if hint:
+            solutionhint = etree.Element("solutionhint", index="1", points= str(penalty_points))
+            etree.SubElement(solutionhint, "p").text = hint
+            return solutionhint
+        return None
+        
     def write_qti(self, output_file="output"):
         root = etree.Element("questestinterop")
 
@@ -114,7 +144,10 @@ class QTIWriter:
             # Feedback
             for fb in self._create_itemfeedback(question):
                 item.append(fb)
-
+            
+            for fb in self._create_feedbackOverall(question):
+                item.append(fb)
+            item.append(self._create_hint(question))
         tree = etree.ElementTree(root)
         tree.write(output_file, encoding="UTF-8", xml_declaration=True, pretty_print=True)
 

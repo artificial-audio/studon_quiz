@@ -12,12 +12,16 @@ class MarkdownReader:
             with open(self._fname, "r", encoding='UTF-8') as f:
                 self._content = f.read()
                 renderer = mistune.create_markdown(renderer='ast')
-                self._ast_tree = renderer(self._content)
+                self._content_n = self.replace_latex(self._content)
+                self._ast_tree = renderer(self._content_n)
             logger.debug(f"Successfully parsed markdown file: {self._fname}")
         except Exception as e:
             logger.error(f"Failed to read file '{self._fname}': {e}")
             raise RuntimeError(f"Failed to read file '{self._fname}': {e}") from e
     
+    def replace_latex(self, content: str) -> str:
+        return re.sub(r'(?<!\$)\$(?!\$)(.*)(?<!\$)\$', r'<span class="latex">\1</span>', content)
+
     def get_attrs(self) -> Dict[str, str]:
         attr: Dict[str, str] = {}
         for element in self._ast_tree:
@@ -149,7 +153,7 @@ class MarkdownReader:
             if child['type'] == 'block_text':
                 try:
                     if tabCount == 0:
-                        dictData['ans'] = child['children'][0]['raw']
+                        dictData['ans'] = ''.join(c['raw'] for c in child['children'] if 'raw' in c)
                     else:
                         attr_text = child['children'][0]['raw'].split(':')
                         if len(attr_text) == 2:

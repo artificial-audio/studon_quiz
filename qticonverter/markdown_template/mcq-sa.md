@@ -35,5 +35,5 @@ Feedback for incorrect answer
 ## Hint (Optional)
 This is the hint to the question. Using a hint will deduct the points given below
 
-### Point (Mandatory if Hint present)
+### Penalty (Mandatory if Hint present)
 1
