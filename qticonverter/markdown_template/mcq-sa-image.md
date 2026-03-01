@@ -9,17 +9,22 @@ y = Ax
 $$
 
 where <span class="latex">A^2 </span> is a constant matrix?
-	Text before image
+
+Images can be inserted using the obisidan format.
+
 ![[Photo.png]]
-	Text after image
+Text can be present after the images also
 ## Options
 
 - 0
+Images can be reused. 
   ![[Photo.png]]
-  there is text also after
+  Images can be surrounded by text as like the problem statement
 	- Score: 0
 	- Remark: Optional Remark
 - A linear transformation of $x$
+Images can be of various formats including png, jpg etc.
+![[Image2.jpg]]
 	- Score: 1
 	- Remark: Optional
 - $x^2$  
