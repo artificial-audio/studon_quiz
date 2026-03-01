@@ -70,9 +70,10 @@ class QTIWriter:
             img_pattern = r'src=["\']([^"\']+)["\']'
             img_matches = re.findall(img_pattern, opt_text)
             uri_pattern = r'<img[^>]+title="([^"]+)"'
-            uri_matches = re.findall(uri_pattern, problem_statement)
-            for img_src in img_matches:
+            uri_matches = re.findall(uri_pattern, opt_text)
+            for img_src,uri_src in zip(img_matches,uri_matches):
                 etree.SubElement(resp_material, "matimage", label=img_src, uri=f"objects/{uri_src}")
+                
         return presentation
 
     def _create_resprocessing(self, question):
@@ -210,7 +211,7 @@ class QTIWriter:
                     img_path = output_dir / img_src
                     if img_path.exists():
                         with open(img_path, "rb") as f:
-                            zf.writestr(f"{package_name}/objects/{Path(img_src).name}", f.read())
+                            zf.writestr(f"{package_name}/objects/{img_src}", f.read())
                     else:
                         # Search recursively in parent directories
                         found = False
@@ -219,7 +220,7 @@ class QTIWriter:
                                 recursive_img_path = parent / img_src
                                 if recursive_img_path.exists():
                                     with open(recursive_img_path, "rb") as f:
-                                        zf.writestr(f"{package_name}/objects/{Path(img_src).name}", f.read())
+                                        zf.writestr(f"{package_name}/objects/{img_src}", f.read())
                                     found = True
                                     break
                         if not found:
