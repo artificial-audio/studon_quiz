@@ -1,4 +1,5 @@
 import re
+import os
 import random
 from loguru import logger
 import mistune
@@ -256,10 +257,16 @@ class MarkdownReader:
 
 def replace_obsidian_images(text):
     def replacer(match):
-        image_name = match.group(1)
-        random_num = random.randint(10000, 99999)  # Random 5-digit number
-        src = f"{image_name}_mob_{random_num}"
-        return f'<p><img alt="" height="194" src="{src}" title="Photo.png" width="259" /></p>'
+        filename = match.group(1)
+        name, ext = os.path.splitext(filename)
+        random_num = random.randint(10000, 99999)
+        new_src = f"{random_num}_mob_{random_num}"
+        return f'<p><img alt="" height="194" src="il_{new_src}" title="Photo.png" width="259" /></p>'
+
+        # image_name = match.group(1)
+        # random_num = random.randint(10000, 99999)  # Random 5-digit number
+        # src = f"{image_name}_mob_{random_num}"
+        # return f'<p><img alt="" height="194" src="{src}" title="Photo.png" width="259" /></p>'
     pattern = r'!\[\[([^\]]+?)\]\]'
 
     
