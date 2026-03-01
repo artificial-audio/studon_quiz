@@ -1,6 +1,7 @@
 from lxml import etree
 import zipfile
 from pathlib import Path
+import re
 
 class QTIWriter:
     def __init__(self, questions, author="Bharadwaj Lakuduva Suresh Babu", ilias_version="9.16.0"):
@@ -39,6 +40,17 @@ class QTIWriter:
         material = etree.SubElement(flow, "material")
         mattext = etree.SubElement(material, "mattext", texttype="text/xhtml")
         mattext.text = f"<p>{question.get_problem_statement()}</p>"
+        # Check if problem statement contains images
+        problem_statement = question.get_problem_statement()
+        mattext.text = f"<p>{problem_statement}</p>"
+        
+        # Extract image references from option text
+        img_pattern = r'src=["\']([^"\']+)["\']'
+        img_matches = re.findall(img_pattern, problem_statement)
+        uri_pattern = r'<img[^>]+title="([^"]+)"'
+        uri_matches = re.findall(uri_pattern, problem_statement)
+        for img_src, uri_src in zip(img_matches,uri_matches):
+            etree.SubElement(material, "matimage", label=img_src, uri=f"objects/{uri_src}")
         
         # Response (multiple choice)
         response_lid = etree.SubElement(flow, "response_lid", ident="MCMR", rcardinality="Multiple")
@@ -49,12 +61,18 @@ class QTIWriter:
             resp_label = etree.SubElement(render_choice, "response_label", ident=str(idx))
             resp_material = etree.SubElement(resp_label, "material")
             resp_mattext = etree.SubElement(resp_material, "mattext", texttype="text/xhtml")
-            # If option contains image, include it
-            if isinstance(opt, dict) and "image" in opt:
-                resp_mattext.text = f'<p><img alt="" src="{opt["image"]}" /></p>'
-                etree.SubElement(resp_material, "matimage", label=str(idx), uri=opt["image"])
-            else:
-                resp_mattext.text = f"<p>{opt if isinstance(opt, str) else opt.get('text','')}</p>"
+            
+            # Get option text
+            opt_text = opt if isinstance(opt, str) else opt.get('text', '')
+            resp_mattext.text = f"<p>{opt_text}</p>"
+            
+            # Extract image references from option text
+            img_pattern = r'src=["\']([^"\']+)["\']'
+            img_matches = re.findall(img_pattern, opt_text)
+            uri_pattern = r'<img[^>]+title="([^"]+)"'
+            uri_matches = re.findall(uri_pattern, problem_statement)
+            for img_src in img_matches:
+                etree.SubElement(resp_material, "matimage", label=img_src, uri=f"objects/{uri_src}")
         return presentation
 
     def _create_resprocessing(self, question):
@@ -172,6 +190,40 @@ class QTIWriter:
         with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
             # Empty objects folder
             zf.writestr(f"{package_name}/objects/", "")
+            # Copy image files to objects folder
+            for question in self.questions:
+                img_sources = set()
+                
+                # Extract images from problem statement
+                problem_statement = question.get_problem_statement()
+                img_pattern = r'<img[^>]+title="([^"]+)"'
+                img_sources.update(re.findall(img_pattern, problem_statement))
+                
+                # Extract images from options
+                options = question.get_options() or []
+                for opt in options:
+                    opt_text = opt if isinstance(opt, str) else opt.get('text', '')
+                    img_sources.update(re.findall(img_pattern, opt_text))
+                
+                # Copy each image file to the ZIP
+                for img_src in img_sources:
+                    img_path = output_dir / img_src
+                    if img_path.exists():
+                        with open(img_path, "rb") as f:
+                            zf.writestr(f"{package_name}/objects/{Path(img_src).name}", f.read())
+                    else:
+                        # Search recursively in parent directories
+                        found = False
+                        for parent in list(output_dir.iterdir()):
+                            if parent.is_dir():
+                                recursive_img_path = parent / img_src
+                                if recursive_img_path.exists():
+                                    with open(recursive_img_path, "rb") as f:
+                                        zf.writestr(f"{package_name}/objects/{Path(img_src).name}", f.read())
+                                    found = True
+                                    break
+                        if not found:
+                            print(f"Warning: Image file not found: {img_src}")
             
             # Empty QPL file
             zf.writestr(f"{package_name}/{output_file.stem}__qpl.xml", "")
