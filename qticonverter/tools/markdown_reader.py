@@ -1,4 +1,5 @@
 import re
+import random
 from loguru import logger
 import mistune
 from typing import Any, Optional
@@ -125,6 +126,7 @@ class MarkdownReader:
         if index is not None:
             statement = self.get_description(2, index)
             logger.debug(f"Problem statement found at index {index}")
+            statement = replace_obsidian_images(statement)
             return statement
         logger.warning("No problem statement found")
         return ""
@@ -154,6 +156,7 @@ class MarkdownReader:
                 try:
                     if tabCount == 0:
                         dictData['ans'] = ''.join(c['raw'] for c in child['children'] if 'raw' in c)
+                        dictData['ans'] = replace_obsidian_images(dictData['ans'])
                     else:
                         attr_text = child['children'][0]['raw'].split(':')
                         if len(attr_text) == 2:
@@ -250,3 +253,14 @@ class MarkdownReader:
             hint['penalty'] = int(hint['penalty'].lstrip())
         logger.debug(f"Hint penalty: {hint['penalty']}")
         return hint
+
+def replace_obsidian_images(text):
+    def replacer(match):
+        image_name = match.group(1)
+        random_num = random.randint(10000, 99999)  # Random 5-digit number
+        src = f"{image_name}_mob_{random_num}"
+        return f'<p><img alt="" height="194" src="{src}" title="Photo.png" width="259" /></p>'
+    pattern = r'!\[\[([^\]]+?)\]\]'
+
+    
+    return re.sub(pattern, replacer, text)
