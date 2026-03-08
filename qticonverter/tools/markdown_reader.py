@@ -22,7 +22,7 @@ class MarkdownReader:
             raise RuntimeError(f"Failed to read file '{self._fname}': {e}") from e
     
     def replace_latex(self, content: str) -> str:
-        return re.sub(r'(?<!\$)\$(?!\$)(.*)(?<!\$)\$', r'<span class="latex">\1</span>', content)
+        return re.sub(r'(?<!\$)\$(?!\$)(.*?)(?<!\$)\$', r'<span class="latex">\1</span>', content)
 
     def get_attrs(self) -> Dict[str, str]:
         attr: Dict[str, str] = {}
