@@ -49,7 +49,7 @@ This command generates a template file named `demosa.md` in the `templates/` out
 - mcq-sa (Multiple Choice Question - Single Answer)
 - mcq-ma (Multiple Choice Question - Multiple Answers)
 
-
+Edit the files using Obsidian or any Markdown editor, then convert them to QTI packages using the commands below.
 
 ### Convert all markdowns in the folder to QTI
 To convert all Markdown files in a folder to a single QTI package, use the following command:
