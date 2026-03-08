@@ -116,7 +116,7 @@ class McqSAQuestion(Question):
         qtimetadata = etree.Element("qtimetadata")
         fields = {
             "ILIAS_VERSION": ilias_version,
-            "QUESTIONTYPE": "MULTIPLE CHOICE QUESTION",
+            "QUESTIONTYPE": "SINGLE CHOICE QUESTION",
             "AUTHOR": author,
             "additional_cont_edit_mode": "default",
             "externalId": ident,
@@ -151,9 +151,9 @@ class McqSAQuestion(Question):
         for img_src, uri_src in zip(img_matches, uri_matches):
             etree.SubElement(material, "matimage", label=img_src, uri=f"objects/{uri_src}")
         
-        # Response (multiple choice)
-        response_lid = etree.SubElement(flow, "response_lid", ident="MCMR", rcardinality="Multiple")
-        render_choice = etree.SubElement(response_lid, "render_choice", shuffle="No")
+        # Response (single choice)
+        response_lid = etree.SubElement(flow, "response_lid", ident="MCSR", rcardinality="Single")
+        render_choice = etree.SubElement(response_lid, "render_choice", shuffle="Yes")
 
         options = self.get_options() or []
         for idx, opt in enumerate(options):
@@ -187,7 +187,7 @@ class McqSAQuestion(Question):
             score = opt.get("score", 0) if isinstance(opt, dict) else 0
             respcondition = etree.SubElement(resprocessing, "respcondition", **{"continue": "Yes"})
             conditionvar = etree.SubElement(respcondition, "conditionvar")
-            varequal = etree.SubElement(conditionvar, "varequal", respident="MCMR")
+            varequal = etree.SubElement(conditionvar, "varequal", respident="MCSR")
             varequal.text = str(idx)
             setvar = etree.SubElement(respcondition, "setvar", action="Add")
             setvar.text = str(score)
