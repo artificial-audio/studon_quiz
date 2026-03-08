@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 """Service to generate markdown templates and copy resources.
 
 This module exposes :class:`TemplateGenerationService` which copies a

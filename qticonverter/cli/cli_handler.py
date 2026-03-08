@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 """Command-line interface for QTI file conversion and template generation.
 
 This module exposes Click-based CLI commands to convert single markdown files

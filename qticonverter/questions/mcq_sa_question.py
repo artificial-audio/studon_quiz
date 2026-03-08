@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 import re
 from lxml import etree
 from qticonverter.questions.question import Question

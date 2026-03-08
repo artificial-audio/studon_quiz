@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from pathlib import Path
 from qticonverter.services.single_question_conversion_service import SingleQuestionConversionService
 import importlib.resources as pkg_resources

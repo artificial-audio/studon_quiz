@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 """Service to convert a single markdown question file into a QTI package.
 
 This module provides a thin service used by the CLI layer and tests to

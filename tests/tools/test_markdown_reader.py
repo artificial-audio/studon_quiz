@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 import importlib.resources as pkg_resources
 from qticonverter.tools.markdown_reader import MarkdownReader
 import pytest

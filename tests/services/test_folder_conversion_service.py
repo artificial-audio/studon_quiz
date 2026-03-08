@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from pathlib import Path
 from qticonverter.services.folder_conversion_service import FolderConversionService
 import importlib.resources as pkg_resources

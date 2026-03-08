@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from loguru import logger
 from .mcq_sa_question import McqSAQuestion
 from .mcq_ma_question import McqMAQuestion

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from qticonverter.services.template_generation_service import TemplateGenerationService
 from pathlib import Path 
 

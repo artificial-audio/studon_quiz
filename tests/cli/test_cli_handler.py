@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from pathlib import Path
 from click.testing import CliRunner
 from qticonverter.cli.cli_handler import cli

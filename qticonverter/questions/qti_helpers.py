@@ -6,6 +6,9 @@ kept intentionally simple and are used by the question classes when
 building QTI packages.
 """
 
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 import re
 from pathlib import Path
 

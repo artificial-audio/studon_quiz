@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from qti_package_maker.package_interface import QTIPackageInterface
 from pathlib import Path
 

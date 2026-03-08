@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from qticonverter.tools.qti_converter import QtiConverter
 from pathlib import Path
 

@@ -68,3 +68,7 @@ qticonverter convert --input question.md --output question.zip
 ```
 
 This will create a QTI package named `question.zip` from the specified `question.md` file.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

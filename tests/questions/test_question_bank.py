@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 from qticonverter.questions.question_bank import QuestionBank
 from pathlib import Path
 import importlib.resources as pkg_resources

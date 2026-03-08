@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Bharadwaj LS
+# SPDX-License-Identifier: MIT
+
 import pytest
 from qticonverter.questions.mcq_sa_question import McqSAQuestion  # replace with the actual module name
 
