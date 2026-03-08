@@ -3,24 +3,26 @@ from lxml import etree
 from qticonverter.questions.question import Question
 
 
-class McqSAQuestion(Question):
+class McqMAQuestion(Question):
+    """Multiple Choice Multiple Answers Question"""
     
     def __init__(self):
+        super().__init__()
         
         self.mandatory_fields = {
-            'type': 'mcq-sa',
+            'type': 'mcq-ma',
             'title': None,
-            'options':None,
+            'options': None,
             'problem_statement': None
         }
         
         self.optional_fields = {
             'summary': None,
-            'feedback':None,
+            'feedback': None,
             'hint': None
         }
     
-    
+    # Getter and setter methods
     def get_type(self):
         return self.mandatory_fields['type']
     
@@ -75,7 +77,7 @@ class McqSAQuestion(Question):
 
     def to_qti_xml(self, ident: str, author: str = "Bharadwaj Lakuduva Suresh Babu", ilias_version: str = "9.16.0") -> etree._Element:
         """
-        Generate QTI XML item element for this MCQ Single Answer question.
+        Generate QTI XML item element for this MCQ Multiple Answers question.
         
         Args:
             ident: Unique identifier for the question item
@@ -151,7 +153,7 @@ class McqSAQuestion(Question):
         for img_src, uri_src in zip(img_matches, uri_matches):
             etree.SubElement(material, "matimage", label=img_src, uri=f"objects/{uri_src}")
         
-        # Response (multiple choice)
+        # Response (multiple choice - multiple answers)
         response_lid = etree.SubElement(flow, "response_lid", ident="MCMR", rcardinality="Multiple")
         render_choice = etree.SubElement(response_lid, "render_choice", shuffle="No")
 

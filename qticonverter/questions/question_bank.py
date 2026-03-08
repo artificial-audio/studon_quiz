@@ -1,5 +1,6 @@
 from loguru import logger
 from .mcq_sa_question import McqSAQuestion
+from .mcq_ma_question import McqMAQuestion
 from qticonverter.tools.qti_converter import QtiConverter
 from qticonverter.tools.markdown_reader import MarkdownReader
 from qticonverter.questions.qti_writer import QTIWriter
@@ -66,7 +67,6 @@ class QuestionBank:
         options = [{"text": option['ans'], "score": float(option['Score']), "feedback": option.get('Remark', '')} for option in question['options']]
         logger.info("Extracted options: {}", options)
 
-
         question_statement = question["problem_statement"]
         # remove non ascii characters
         question_statement = ''.join([i if ord(i) < 128 else ' ' for i in question_statement])
@@ -74,6 +74,15 @@ class QuestionBank:
 
         if question['type'] == 'mcq-sa':
             q = McqSAQuestion()
+            q.set_title(title=question['title'])
+            q.set_problem_statement(question_statement)
+            q.set_options(options)  
+            q.set_summary(question['summary'])
+            q.set_feedback(question['feedback'])
+            q.set_hint(question['hint'])
+            self.questions.append(q)
+        elif question['type'] == 'mcq-ma':
+            q = McqMAQuestion()
             q.set_title(title=question['title'])
             q.set_problem_statement(question_statement)
             q.set_options(options)  
