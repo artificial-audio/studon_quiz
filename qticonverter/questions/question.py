@@ -21,7 +21,7 @@ class Question(ABC):
         pass
 
     @abstractmethod
-    def to_qti_xml(self, ident: str, author: str = "Bharadwaj Lakuduva Suresh Babu", ilias_version: str = "9.16.0") -> etree._Element:
+    def to_qti_xml(self, ident: str, author: str = "User", ilias_version: str = "9.16.0") -> etree._Element:
         """Generate a QTI `item` element for this question.
 
         Args:

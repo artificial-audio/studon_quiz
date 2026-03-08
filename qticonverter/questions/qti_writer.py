@@ -7,7 +7,7 @@ from qticonverter.questions.qti_helpers import QTIImageExtractor, QTIImageLocato
 
 
 class QTIWriter:
-    def __init__(self, questions, author="Bharadwaj Lakuduva Suresh Babu", ilias_version="9.16.0"):
+    def __init__(self, questions, author="User", ilias_version="9.16.0"):
         """
         :param questions: List of Question objects (McqSAQuestion, McqMAQuestion, etc.)
         """

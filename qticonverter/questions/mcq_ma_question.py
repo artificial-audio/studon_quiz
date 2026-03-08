@@ -92,7 +92,7 @@ class McqMAQuestion(Question):
         """
         return self.isValid()
 
-    def to_qti_xml(self, ident: str, author: str = "Bharadwaj Lakuduva Suresh Babu", ilias_version: str = "9.16.0") -> etree._Element:
+    def to_qti_xml(self, ident: str, author: str = "User", ilias_version: str = "9.16.0") -> etree._Element:
         """Produce the QTI `item` XML element for this multiple-answer question.
 
         Parameters
