@@ -269,13 +269,15 @@ class MarkdownReader:
         """
         dictData: Dict[str, Any] = {}
         for child in node['children']:
-            if child['type'] == 'block_text':
+            if child['type'] in ('block_text', 'paragraph'):
                 try:
                     if tabCount == 0:
                         dictData['ans'] = ''.join(c['raw'] for c in child['children'] if 'raw' in c)
                         dictData['ans'] = replace_obsidian_images(dictData['ans'])
                     else:
-                        attr_text = child['children'][0]['raw'].split(':')
+                        # Extract all raw text from all children (handles LaTeX and inline HTML)
+                        full_text = ''.join(c['raw'] for c in child['children'] if 'raw' in c)
+                        attr_text = full_text.split(':', 1)  # Split only on first colon
                         if len(attr_text) == 2:
                             dictData[attr_text[0].lstrip()] = attr_text[1].lstrip()
                 except Exception as e:
@@ -351,7 +353,7 @@ class MarkdownReader:
         pattern = r'hint'
         content = []
         nextFieldType = 'hint'
-        patternPenalty = r'Penalty'
+        patternPenalty = r'(Penalty|Point)'
         for element in self._ast_tree:
             if element['type'] == 'heading' and element['attrs']['level'] == level and re.search(pattern, element['children'][0]['raw'], re.IGNORECASE):
                 recordHint = True
