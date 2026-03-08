@@ -22,12 +22,11 @@ class TemplateGenerationService:
     _questionTemplates = {
         "mcq-sa": {
             "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-sa.md",
-            "resources": [pkg_resources.files("qticonverter") / "markdown_template/images/Photo.png", 
-                          pkg_resources.files("qticonverter") / "markdown_template/images/Image2.jpg"]
+            "resources": [pkg_resources.files("qticonverter") / "markdown_template/images/signal_plot.png" ]
         },
         "mcq-ma": {
             "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-ma.md",
-            "resources": []
+            "resources": [pkg_resources.files("qticonverter") / "markdown_template/images/signal_plot.png" ]
         }
     }
     

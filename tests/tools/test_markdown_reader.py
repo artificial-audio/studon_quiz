@@ -7,7 +7,7 @@ def test_markdown_reader_creation():
     file = pkg_resources.files("qticonverter")/"markdown_template/mcq-sa.md"
     try:
         reader = MarkdownReader(str(file))
-    except:
+    except Exception:
         pytest.fail("Object not created")
     
     file = pkg_resources.files("qticonverter")/"markdown_template/mcq-sa-unknown.md"
@@ -43,7 +43,7 @@ def test_markdown_reader_get_title() -> None:
     file = pkg_resources.files("qticonverter")/"markdown_template/mcq-sa.md"
     reader = MarkdownReader(str(file))
     title = reader.get_title()
-    assert title == 'Matrix–Vector Multiplication'
+    assert title == 'Discrete-Time Fourier Transform Fundamentals'
 
 def test_markdown_reader_get_short_description() -> None:
     file = pkg_resources.files("qticonverter")/"markdown_template/mcq-sa.md"
