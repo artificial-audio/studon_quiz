@@ -143,13 +143,15 @@ class McqSAQuestion(Question):
         problem_statement = self.get_problem_statement()
         mattext.text = f"<p>{problem_statement}</p>"
         
-        # Extract image references from problem statement
-        img_pattern = r'src=["\']([^"\']+)["\']'
-        img_matches = re.findall(img_pattern, problem_statement)
-        uri_pattern = r'<img[^>]+title="([^"]+)"'
-        uri_matches = re.findall(uri_pattern, problem_statement)
-        for img_src, uri_src in zip(img_matches, uri_matches):
-            etree.SubElement(material, "matimage", label=img_src, uri=f"objects/{uri_src}")
+        # Extract image references from problem statement with dimensions
+        images = self._extract_images_with_dimensions(problem_statement)
+        for img_data in images:
+            attrs = {"label": img_data['src'], "uri": f"objects/{img_data['filename']}"}
+            if img_data['width']:
+                attrs['width'] = img_data['width']
+            if img_data['height']:
+                attrs['height'] = img_data['height']
+            etree.SubElement(material, "matimage", **attrs)
         
         # Response (single choice)
         response_lid = etree.SubElement(flow, "response_lid", ident="MCSR", rcardinality="Single")
@@ -165,13 +167,15 @@ class McqSAQuestion(Question):
             opt_text = opt if isinstance(opt, str) else opt.get('text', '')
             resp_mattext.text = f"<p>{opt_text}</p>"
             
-            # Extract image references from option text
-            img_pattern = r'src=["\']([^"\']+)["\']'
-            img_matches = re.findall(img_pattern, opt_text)
-            uri_pattern = r'<img[^>]+title="([^"]+)"'
-            uri_matches = re.findall(uri_pattern, opt_text)
-            for img_src, uri_src in zip(img_matches, uri_matches):
-                etree.SubElement(resp_material, "matimage", label=img_src, uri=f"objects/{uri_src}")
+            # Extract image references from option text with dimensions
+            images = self._extract_images_with_dimensions(opt_text)
+            for img_data in images:
+                attrs = {"label": img_data['src'], "uri": f"objects/{img_data['filename']}"}
+                if img_data['width']:
+                    attrs['width'] = img_data['width']
+                if img_data['height']:
+                    attrs['height'] = img_data['height']
+                etree.SubElement(resp_material, "matimage", **attrs)
                 
         return presentation
 
@@ -243,3 +247,49 @@ class McqSAQuestion(Question):
             etree.SubElement(solutionhint, "p").text = hint
             return solutionhint
         return None
+
+    def _extract_images_with_dimensions(self, text: str) -> list:
+        """
+        Extract image data including src, filename, width, and height from HTML img tags.
+        
+        Args:
+            text: HTML text containing img tags
+            
+        Returns:
+            List of dicts with keys: 'src', 'filename', 'width', 'height'
+        """
+        images = []
+        # Pattern to match complete img tags
+        img_tag_pattern = r'<img[^>]+>'
+        img_tags = re.findall(img_tag_pattern, text)
+        
+        for img_tag in img_tags:
+            img_data = {'src': None, 'filename': None, 'width': None, 'height': None}
+            
+            # Extract src attribute
+            src_pattern = r'src=["\']([^"\']+)["\']'
+            src_match = re.search(src_pattern, img_tag)
+            if src_match:
+                img_data['src'] = src_match.group(1)
+            
+            # Extract title attribute (filename)
+            title_pattern = r'title=["\']([^"\']+)["\']'
+            title_match = re.search(title_pattern, img_tag)
+            if title_match:
+                img_data['filename'] = title_match.group(1)
+            
+            # Extract width attribute
+            width_pattern = r'width=["\']([^"\']+)["\']'
+            width_match = re.search(width_pattern, img_tag)
+            if width_match:
+                img_data['width'] = width_match.group(1)
+            
+            # Extract height attribute
+            height_pattern = r'height=["\']([^"\']+)["\']'
+            height_match = re.search(height_pattern, img_tag)
+            if height_match:
+                img_data['height'] = height_match.group(1)
+            
+            images.append(img_data)
+        
+        return images

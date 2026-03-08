@@ -12,6 +12,7 @@ class QTIImageExtractor:
     # Pattern to extract image references from HTML
     IMG_URI_PATTERN = r'<img[^>]+title="([^"]+)"'
     IMG_SRC_PATTERN = r'src=["\']([^"\']+)["\']'
+    IMG_TAG_PATTERN = r'<img[^>]+>'
     
     @staticmethod
     def extract_image_uris(text: str) -> list:
@@ -42,6 +43,45 @@ class QTIImageExtractor:
         if not text:
             return []
         return re.findall(QTIImageExtractor.IMG_SRC_PATTERN, text)
+    
+    @staticmethod
+    def extract_image_with_dimensions(img_tag: str) -> dict:
+        """
+        Extract image metadata from an img tag.
+        
+        Args:
+            img_tag: HTML img tag string
+            
+        Returns:
+            Dict with keys: 'src', 'filename', 'width', 'height'
+        """
+        img_data = {'src': None, 'filename': None, 'width': None, 'height': None}
+        
+        # Extract src attribute
+        src_pattern = r'src=["\']([^"\']+)["\']'
+        src_match = re.search(src_pattern, img_tag)
+        if src_match:
+            img_data['src'] = src_match.group(1)
+        
+        # Extract title attribute (filename)
+        title_pattern = r'title=["\']([^"\']+)["\']'
+        title_match = re.search(title_pattern, img_tag)
+        if title_match:
+            img_data['filename'] = title_match.group(1)
+        
+        # Extract width attribute
+        width_pattern = r'width=["\']([^"\']+)["\']'
+        width_match = re.search(width_pattern, img_tag)
+        if width_match:
+            img_data['width'] = width_match.group(1)
+        
+        # Extract height attribute
+        height_pattern = r'height=["\']([^"\']+)["\']'
+        height_match = re.search(height_pattern, img_tag)
+        if height_match:
+            img_data['height'] = height_match.group(1)
+        
+        return img_data
     
     @staticmethod
     def collect_all_images_from_question(question) -> set:

@@ -257,13 +257,34 @@ class MarkdownReader:
 
 def replace_obsidian_images(text):
     def replacer(match):
-        filename = match.group(1)
-        name, ext = os.path.splitext(filename)
+        content = match.group(1)
+        
+        # Parse the format: ![[filename.ext]] or ![[filename.ext|width]] or ![[filename.ext|widthxheight]]
+        if '|' in content:
+            filename, dimensions = content.split('|', 1)
+            filename = filename.strip()
+            dimensions = dimensions.strip()
+            
+            # Check if it's width x height or just width
+            if 'x' in dimensions.lower():
+                parts = dimensions.lower().split('x')
+                width = parts[0].strip()
+                height = parts[1].strip()
+            else:
+                # Single value means width only
+                width = dimensions
+                height = "194"  # Keep default height
+        else:
+            filename = content.strip()
+            width = "259"
+            height = "194"
+        
+        # Generate random src identifier
         random_num = random.randint(10000, 99999)
         new_src = f"{random_num}_mob_{random_num}"
-        return f'<p><img alt="" height="194" src="il_{new_src}" title="{filename}" width="259" /></p>'
+        
+        return f'<p><img alt="" height="{height}" src="il_{new_src}" title="{filename}" width="{width}" /></p>'
 
     pattern = r'!\[\[([^\]]+?)\]\]'
-
     
     return re.sub(pattern, replacer, text)
