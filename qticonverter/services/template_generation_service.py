@@ -21,7 +21,7 @@ class TemplateGenerationService:
     """
     _questionTemplates = {
         "mcq-sa": {
-            "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-sa-image.md",
+            "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-sa.md",
             "resources": [pkg_resources.files("qticonverter") / "markdown_template/images/Photo.png", 
                           pkg_resources.files("qticonverter") / "markdown_template/images/Image2.jpg"]
         },
