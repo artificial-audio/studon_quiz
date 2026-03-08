@@ -4,7 +4,11 @@ from qticonverter.questions.question import Question
 
 
 class McqMAQuestion(Question):
-    """Multiple Choice Multiple Answers Question"""
+    """Representation of a multiple-answer multiple choice question.
+
+    Stores required and optional fields and produces QTI XML for the
+    question where multiple responses may be correct.
+    """
     
     def __init__(self):
         super().__init__()
@@ -66,26 +70,45 @@ class McqMAQuestion(Question):
         return list(self.mandatory_fields.keys()) + list(self.optional_fields.keys())
     
     def isValid(self):
+        """Return True when all mandatory fields are present.
+
+        Returns
+        -------
+        bool
+            True if none of the mandatory fields are None, otherwise False.
+        """
         for field_name, field_value in self.mandatory_fields.items():
             if field_value is None:
                 return False
         return True
 
     def is_valid(self):
-        """Implement abstract method from Question base class"""
+        """Adapter to satisfy the `Question` abstract interface.
+
+        Returns
+        -------
+        bool
+            Result of :meth:`isValid`.
+        """
         return self.isValid()
 
     def to_qti_xml(self, ident: str, author: str = "Bharadwaj Lakuduva Suresh Babu", ilias_version: str = "9.16.0") -> etree._Element:
-        """
-        Generate QTI XML item element for this MCQ Multiple Answers question.
-        
-        Args:
-            ident: Unique identifier for the question item
-            author: Author name for metadata
-            ilias_version: ILIAS version string
-            
-        Returns:
-            An lxml etree Element representing the complete QTI item
+        """Produce the QTI `item` XML element for this multiple-answer question.
+
+        Parameters
+        ----------
+        ident : str
+            Unique identifier for the generated QTI item.
+        author : str, optional
+            Author name to include in metadata (default provided).
+        ilias_version : str, optional
+            ILIAS version string to include in metadata.
+
+        Returns
+        -------
+        lxml.etree._Element
+            Constructed QTI `item` element containing presentation,
+            response processing, feedback and optional hint elements.
         """
         item = etree.Element("item", ident=ident, title=self.get_title(), maxattempts="0")
         qticomment = etree.SubElement(item, "qticomment")
@@ -115,7 +138,22 @@ class McqMAQuestion(Question):
         return item
 
     def _create_qtimetadata(self, ident: str, author: str, ilias_version: str) -> etree._Element:
-        """Create QTI metadata element"""
+        """Create a `qtimetadata` element populated with standard fields.
+
+        Parameters
+        ----------
+        ident : str
+            External id to include in the metadata.
+        author : str
+            Author name.
+        ilias_version : str
+            ILIAS version string.
+
+        Returns
+        -------
+        lxml.etree._Element
+            The `qtimetadata` element ready to be appended to the item.
+        """
         qtimetadata = etree.Element("qtimetadata")
         fields = {
             "ILIAS_VERSION": ilias_version,
@@ -136,7 +174,11 @@ class McqMAQuestion(Question):
         return qtimetadata
 
     def _create_presentation(self, ident: str) -> etree._Element:
-        """Create presentation element with problem statement and options"""
+        """Create the `presentation` element with problem statement and options.
+
+        The returned element includes any embedded images converted into
+        `matimage` children with attributes preserved.
+        """
         presentation = etree.Element("presentation", label=self.get_title())
         flow = etree.SubElement(presentation, "flow")
         
@@ -183,7 +225,14 @@ class McqMAQuestion(Question):
         return presentation
 
     def _create_resprocessing(self) -> etree._Element:
-        """Create response processing element with scoring logic"""
+        """Create the `resprocessing` element implementing scoring rules.
+
+        Returns
+        -------
+        lxml.etree._Element
+            The `resprocessing` element describing score calculation and
+            displayfeedback links for each option.
+        """
         resprocessing = etree.Element("resprocessing")
         outcomes = etree.SubElement(resprocessing, "outcomes")
         etree.SubElement(outcomes, "decvar")
@@ -202,7 +251,14 @@ class McqMAQuestion(Question):
         return resprocessing
 
     def _create_itemfeedback(self) -> list:
-        """Create per-option feedback elements"""
+        """Create a list of per-option `itemfeedback` elements.
+
+        Returns
+        -------
+        list
+            List of `lxml.etree.Element` objects representing feedback for
+            each response option.
+        """
         feedbacks = []
         options = self.get_options() or []
         for idx, opt in enumerate(options):
@@ -219,7 +275,13 @@ class McqMAQuestion(Question):
         return feedbacks
 
     def _create_feedbackOverall(self) -> list:
-        """Create overall correct/wrong feedback elements"""
+        """Create overall feedback elements for correct/wrong outcomes.
+
+        Returns
+        -------
+        list
+            List of `itemfeedback` elements for overall feedback.
+        """
         feedbacks = []
         feedback = self.get_feedback()
         if feedback and isinstance(feedback, dict):
@@ -241,7 +303,14 @@ class McqMAQuestion(Question):
         return feedbacks
     
     def _create_hint(self) -> etree._Element:
-        """Create hint element with penalty points"""
+        """Create a `solutionhint` element when a hint is present.
+
+        Returns
+        -------
+        lxml.etree._Element or None
+            The created `solutionhint` element, or None if no hint data is
+            available.
+        """
         hint_data = self.get_hint()
         hint = hint_data.get('hint') if isinstance(hint_data, dict) else None
         penalty_points = hint_data.get('penalty', 0) if isinstance(hint_data, dict) else 0
@@ -252,14 +321,19 @@ class McqMAQuestion(Question):
         return None
 
     def _extract_images_with_dimensions(self, text: str) -> list:
-        """
-        Extract image data including src, filename, width, and height from HTML img tags.
-        
-        Args:
-            text: HTML text containing img tags
-            
-        Returns:
-            List of dicts with keys: 'src', 'filename', 'width', 'height'
+        """Parse HTML and extract image attributes including dimensions.
+
+        Parameters
+        ----------
+        text : str
+            HTML text containing one or more `<img>` tags.
+
+        Returns
+        -------
+        list
+            A list of dictionaries with keys: ``src``, ``filename``,
+            ``width``, and ``height``. Values are strings or ``None`` if
+            not present.
         """
         images = []
         # Pattern to match complete img tags
@@ -296,4 +370,3 @@ class McqMAQuestion(Question):
             images.append(img_data)
         
         return images
-        return None

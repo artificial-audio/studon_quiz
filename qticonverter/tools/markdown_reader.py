@@ -7,6 +7,17 @@ from typing import Any, Optional
 from typing import Any, Dict, List
 
 class MarkdownReader:
+    """Utility for parsing Markdown files into structured text pieces.
+
+    The class uses `mistune` to produce an AST for the input Markdown file
+    and exposes convenience methods to extract common question fields used
+    by the converter (attributes, headings, summary, problem statement,
+    options, feedback and hint sections).
+
+    Args:
+        fname: Path to the markdown file to parse.
+    """
+
     def __init__(self, fname: str) -> None:
         self._fname = fname
         self._ast_tree: List[Dict[str, Any]] | None = None
@@ -22,9 +33,30 @@ class MarkdownReader:
             raise RuntimeError(f"Failed to read file '{self._fname}': {e}") from e
     
     def replace_latex(self, content: str) -> str:
+        """Replace single-dollar LaTeX inline math with a span element.
+
+        This converts `$math$` occurrences to
+        `<span class="latex">math</span>` while avoiding display math
+        (`$$...$$`). The function is a best-effort textual transform and
+        does not perform LaTeX validation.
+
+        Args:
+            content: Markdown content possibly containing inline LaTeX.
+
+        Returns:
+            str: Transformed content with inline LaTeX wrapped in a span.
+        """
         return re.sub(r'(?<!\$)\$(?!\$)(.*?)(?<!\$)\$', r'<span class="latex">\1</span>', content)
 
     def get_attrs(self) -> Dict[str, str]:
+        """Extract leading key:value attributes from the top of the file.
+
+        The method walks the AST until the first heading and collects
+        any paragraph lines formatted as `key: value` into a dictionary.
+
+        Returns:
+            Dict[str, str]: Mapping of attribute names to their string values.
+        """
         attr: Dict[str, str] = {}
         for element in self._ast_tree:
             if element['type'] == 'heading':
@@ -41,6 +73,14 @@ class MarkdownReader:
         return attr
 
     def get_headings(self, level: int) -> List[str]:
+        """Return all headings at the given markdown level.
+
+        Args:
+            level: Heading level to filter (1 for '#', 2 for '##', etc.).
+
+        Returns:
+            List[str]: A list of heading text strings in document order.
+        """
         headings: List[str] = []
         for element in self._ast_tree:
             if element['type'] == 'heading' and element['attrs']['level'] == level:
@@ -49,6 +89,19 @@ class MarkdownReader:
         return headings
 
     def get_description(self, level: int, offset: int) -> str:
+        """Extract the paragraph/inline content that follows a heading.
+
+        The function locates the `offset`-th heading at the given
+        `level` and returns the textual content between that heading and
+        the next heading of the same or higher level.
+
+        Args:
+            level: Heading level to search.
+            offset: Zero-based index of the matching heading occurrence.
+
+        Returns:
+            str: Concatenated text content belonging to the heading section.
+        """
         description: str = ""
         ctr = 0
         start_recording = False
@@ -76,6 +129,16 @@ class MarkdownReader:
         return description
 
     def _ast_to_text(self, ast_nodes: List[Dict[str, Any]]) -> str:
+        """Convert a list of AST nodes into plain text.
+
+        Supports text nodes, line breaks, lists and inline HTML.
+
+        Args:
+            ast_nodes: A list of nodes produced by the `mistune` AST renderer.
+
+        Returns:
+            str: The joined textual representation of the nodes.
+        """
         retStr = ''
         for node in ast_nodes:
             if node['type'] == 'text':
@@ -89,6 +152,15 @@ class MarkdownReader:
         return retStr
 
     def _unwrap_list_to_text(self, node: Dict[str, Any], tabCount: int) -> str:
+        """Recursively flatten list AST nodes into text with indentation.
+
+        Args:
+            node: AST node representing a list or list item.
+            tabCount: Current indentation level (number of leading tabs).
+
+        Returns:
+            str: Flattened string representation of the list subtree.
+        """
         retStr = ''
         for child in node['children']:
             if child['type'] == 'block_text':
@@ -102,6 +174,11 @@ class MarkdownReader:
         return retStr
     
     def get_q_type(self) -> str | None:
+        """Return the `type` attribute declared at the top of the file.
+
+        Returns:
+            str | None: The value of the `type` attribute or None if not present.
+        """
         attr = self.get_attrs()
         q_type = attr.get('type')
         if q_type:
@@ -109,6 +186,11 @@ class MarkdownReader:
         return q_type
 
     def get_title(self) -> str | None:
+        """Return the first level-1 heading as the question title.
+
+        Returns:
+            str | None: Title string or None if no level-1 heading exists.
+        """
         titles = self.get_headings(1)
         title = titles[0] if titles else None
         if title:
@@ -116,11 +198,25 @@ class MarkdownReader:
         return title
 
     def get_summary(self) -> str:
+        """Return the top-level description (summary) following the title.
+
+        Returns:
+            str: Summary text for the question.
+        """
         description = self.get_description(1, 0)
         logger.debug(f"Summary length: {len(description)} chars")
         return description
 
     def get_problem_statement(self) -> str:
+        """Locate and return the problem statement under level-2 headings.
+
+        The method searches level-2 headings for one that matches
+        /quiz/i and returns its section text with Obsidian-style image
+        links converted to inline `<img>` HTML.
+
+        Returns:
+            str: Problem statement text or empty string if not found.
+        """
         titles = self.get_headings(2)
         pattern = r"quiz"
         index = next((i for i, s in enumerate(titles) if re.search(pattern, s, re.IGNORECASE)), None)
@@ -133,6 +229,16 @@ class MarkdownReader:
         return ""
 
     def get_options(self) -> List[Dict[str, Any]]:
+        """Extract the options block from the markdown as a list of dicts.
+
+        The function searches for a level-2 heading containing the word
+        "options" and then parses the following list into option
+        dictionaries. Each option dictionary may contain answer text and
+        additional key/value attributes.
+
+        Returns:
+            List[Dict[str, Any]]: List of option dictionaries.
+        """
         level = 2
         pattern = r"options"
         build_opt_dict = False
@@ -151,6 +257,16 @@ class MarkdownReader:
         return options
         
     def _get_option_dict(self, node: Dict[str, Any], tabCount: int) -> Dict[str, Any]:
+        """Convert a list item AST node into an option dictionary.
+
+        Args:
+            node: AST node for the list item.
+            tabCount: Current indentation depth within nested lists.
+
+        Returns:
+            Dict[str, Any]: Dictionary containing parsed option fields such as 
+                `ans`, `score`, `feedback`, etc.
+        """
         dictData: Dict[str, Any] = {}
         for child in node['children']:
             if child['type'] == 'block_text':
@@ -174,6 +290,12 @@ class MarkdownReader:
         return dictData
 
     def get_feedback(self) -> Dict[str, str]:
+        """Extract feedback sections under a level-2 `Feedback` heading.
+
+        Returns:
+            Dict[str, str]: Mapping with keys "Correct" and/or "Wrong" to their 
+                respective feedback text.
+        """
         level = 2
         feedback: Dict[str, str] = {}
         recordFeedback = False
@@ -218,6 +340,11 @@ class MarkdownReader:
         return feedback
 
     def get_hint(self) -> Dict[str, Any]:
+        """Extract hint and penalty information from a level-2 `Hint` section.
+
+        Returns:
+            Dict[str, Any]: Dictionary containing at least the key `hint` and `penalty`.
+        """
         level = 2
         hint: Dict[str, Any] = {'penalty': 0}
         recordHint = False
@@ -256,6 +383,23 @@ class MarkdownReader:
         return hint
 
 def replace_obsidian_images(text):
+    """Convert Obsidian-style image links into HTML <img> tags.
+
+    Supported input formats inside the double brackets include:
+    - `filename.ext`
+    - `filename.ext|width`
+    - `filename.ext|widthxheight`
+
+    The function generates a randomized `src` identifier and returns an
+    HTML paragraph containing an `<img>` element with `title`, `src`,
+    `width` and `height` attributes.
+
+    Args:
+        text: Input text potentially containing Obsidian-style image links.
+
+    Returns:
+        str: Text with Obsidian image links replaced by HTML `<img>` tags.
+    """
     def replacer(match):
         content = match.group(1)
         

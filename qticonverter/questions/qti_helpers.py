@@ -1,5 +1,9 @@
-"""
-Helper utilities for QTI XML generation and image handling.
+"""Helper utilities for QTI XML generation and image handling.
+
+This module provides small helpers to extract image references from
+HTML fragments and to locate image files on disk. The utilities are
+kept intentionally simple and are used by the question classes when
+building QTI packages.
 """
 
 import re
@@ -7,7 +11,11 @@ from pathlib import Path
 
 
 class QTIImageExtractor:
-    """Utility class for extracting and managing images in QTI content"""
+    """Utility class for extracting and managing images in QTI content.
+
+    The extractor provides functions to parse `<img>` tag attributes and
+    to collect image references from question objects.
+    """
     
     # Pattern to extract image references from HTML
     IMG_URI_PATTERN = r'<img[^>]+title="([^"]+)"'
@@ -16,14 +24,15 @@ class QTIImageExtractor:
     
     @staticmethod
     def extract_image_uris(text: str) -> list:
-        """
-        Extract image URI references from text.
-        
+        """Extract image `title` values from HTML `<img>` tags.
+
         Args:
-            text: Text containing image references
-            
+            text: HTML text containing one or more `<img>` tags.
+
         Returns:
-            List of image URIs found in the text
+            list[str]: List of values extracted from the `title` attribute of
+                matching `<img>` tags. Returns an empty list when `text` is
+                falsy or no matches are found.
         """
         if not text:
             return []
@@ -31,14 +40,14 @@ class QTIImageExtractor:
     
     @staticmethod
     def extract_image_sources(text: str) -> list:
-        """
-        Extract image source paths from text.
-        
+        """Extract the `src` attribute values from `<img>` tags.
+
         Args:
-            text: Text containing image references
-            
+            text: HTML text containing one or more `<img>` tags.
+
         Returns:
-            List of image source paths found in the text
+            list[str]: List of `src` attribute values. Returns an empty list when
+                `text` is falsy or no matches are found.
         """
         if not text:
             return []
@@ -46,14 +55,15 @@ class QTIImageExtractor:
     
     @staticmethod
     def extract_image_with_dimensions(img_tag: str) -> dict:
-        """
-        Extract image metadata from an img tag.
-        
+        """Parse a single `<img>` tag and extract common attributes.
+
         Args:
-            img_tag: HTML img tag string
-            
+            img_tag: HTML snippet containing an `<img .../>` tag.
+
         Returns:
-            Dict with keys: 'src', 'filename', 'width', 'height'
+            dict: Dictionary with keys: ``src``, ``filename`` (from the
+                `title` attribute), ``width`` and ``height``. Values are
+                strings or ``None`` when an attribute is missing.
         """
         img_data = {'src': None, 'filename': None, 'width': None, 'height': None}
         
@@ -85,14 +95,19 @@ class QTIImageExtractor:
     
     @staticmethod
     def collect_all_images_from_question(question) -> set:
-        """
-        Collect all unique image URIs from a question.
-        
+        """Collect unique image `title` references used in a question.
+
+        The function inspects the problem statement and each option to
+        gather image `title` values (as produced by
+        :func:`extract_image_uris`).
+
         Args:
-            question: A Question object (McqSAQuestion, McqMAQuestion, etc.)
-            
+            question: Question-like object exposing `get_problem_statement()` and
+                `get_options()` methods.
+
         Returns:
-            Set of unique image URI filenames
+            set[str]: Set of unique image title strings referenced by the
+                question.
         """
         img_sources = set()
         
@@ -110,55 +125,65 @@ class QTIImageExtractor:
 
 
 class QTIImageLocator:
-    """Utility class for locating image files in the file system"""
+    """Utility class for locating image files in the file system.
+
+    The locator implements naive search strategies to find an image file
+    starting from a directory. It is not intended to be exhaustive but
+    is sufficient for locating image files bundled alongside the source
+    markdown files in this project.
+    """
     
     @staticmethod
     def find_image(image_filename: str, search_start_dir: Path) -> Path:
-        """
-        Find an image file by searching in the current directory and parent directories.
-        
+        """Search for `image_filename` starting at `search_start_dir`.
+
+        The function first checks `search_start_dir` directly and then
+        inspects its immediate children directories. It returns the first
+        matching `Path` found or ``None`` when the file cannot be
+        located.
+
         Args:
-            image_filename: Name of the image file to find
-            search_start_dir: Starting directory for the search
-            
+            image_filename: File name of the image to search for.
+            search_start_dir: Directory from which to begin the search.
+
         Returns:
-            Path to the image file if found, None otherwise
+            pathlib.Path | None: Path to the found image file, or ``None`` if not found.
         """
         # Check in the current directory
         current_path = search_start_dir / image_filename
         if current_path.exists():
             return current_path
-        
-        # Search recursively in parent directories
+
+        # Search in immediate subdirectories
         for parent in search_start_dir.iterdir():
             if parent.is_dir():
                 recursive_path = parent / image_filename
                 if recursive_path.exists():
                     return recursive_path
-        
+
         return None
     
     @staticmethod
     def locate_images(image_filenames: set, search_dir: Path) -> dict:
-        """
-        Locate multiple image files.
-        
+        """Locate multiple image files under `search_dir`.
+
         Args:
-            image_filenames: Set of image filenames to locate
-            search_dir: Starting directory for the search
-            
+            image_filenames: Set of image file names to search for.
+            search_dir: Directory from which to begin the search for each file.
+
         Returns:
-            Dictionary mapping found image names to their Path objects,
-            and a set of missing image names
+            tuple[dict, set]: A tuple `(found, missing)` where `found` is a mapping from
+                image filename to its located `pathlib.Path`, and `missing` is
+                a set of filenames that could not be found.
         """
         found = {}
         missing = set()
-        
+
         for img_name in image_filenames:
             img_path = QTIImageLocator.find_image(img_name, search_dir)
             if img_path:
                 found[img_name] = img_path
             else:
                 missing.add(img_name)
-        
+
         return found, missing

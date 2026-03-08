@@ -1,9 +1,24 @@
+"""Service to generate markdown templates and copy resources.
+
+This module exposes :class:`TemplateGenerationService` which copies a
+predefined markdown template and any associated resource images into a
+target directory, useful when users want a starter file for authoring
+questions.
+"""
+
 from pathlib import Path
 import shutil
 from loguru import logger
 import importlib.resources as pkg_resources
 
+
 class TemplateGenerationService:
+    """Generate a starter markdown template for a given question type.
+
+    The service knows about a small set of built-in templates defined in
+    ``_questionTemplates`` and will copy both the markdown template and
+    any associated image resources to the destination path.
+    """
     _questionTemplates = {
         "mcq-sa": {
             "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-sa-image.md",
@@ -17,11 +32,22 @@ class TemplateGenerationService:
     }
     
     def __init__(self, f_name: Path, q_type: str) -> None:
+        """Initialize the template generator.
+
+        Args:
+            f_name: Destination filename for the generated markdown template.
+            q_type: The short question type key (e.g., ``mcq-sa``).
+        """
         self._f_name = f_name
         self._q_type = q_type
         logger.info(f"Initialized TemplateGenerationService with file name: {self._f_name} and question type: {self._q_type}")
     
     def generate_template(self):
+        """Copy the selected template and its resources to the destination.
+
+        Returns:
+            bool: True on success, False on failure or when the type is unknown.
+        """
         success = True
         logger.info(f"Generating template for question type: {self._q_type}")
         if self._q_type in TemplateGenerationService._questionTemplates:

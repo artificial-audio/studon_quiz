@@ -1,5 +1,8 @@
-"""
-Presents the CLI options and handles the requests by delegating to the proper function
+"""Command-line interface for QTI file conversion and template generation.
+
+This module exposes Click-based CLI commands to convert single markdown files
+or folders to QTI packages, and to generate starter markdown templates for
+new questions.
 """
 
 import click
@@ -11,10 +14,12 @@ from ..services.single_question_conversion_service import SingleQuestionConversi
 from ..services.folder_conversion_service import FolderConversionService
 
 def set_verbosity_level(verbose: int):
-    """Sets the verbosity level for logging
+    """Configure the logging verbosity level.
 
-    Args:
-        verbose (int): Verbosity level
+    Parameters
+    ----------
+    verbose : int
+        Verbosity level. 0=WARNING, 1=INFO, 2=DEBUG, 3+=TRACE.
     """
     # trace, debug, info, success, warning, error, critical
     logger.remove()
@@ -70,12 +75,18 @@ question_type_abbr = [
 
 @click.option('-v','--verbose',count=True, help='Enables verbose mode', required=False)
 def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Choice[str], verbose: int):
-    """Generate the template file
+    """Generate a starter markdown template for a new question.
 
-    Args:
-        name (click.Path): Ouput file name
-        folder (click.Path): _description_
-        q_type (click.Choice[str]): _description_
+    Parameters
+    ----------
+    name : pathlib.Path
+        Output file name for the template.
+    folder : pathlib.Path
+        Directory where the template will be created.
+    q_type : str
+        Question type abbreviation (e.g., mcq-sa, mcq-ma).
+    verbose : int
+        Verbosity level for logging.
     """
     set_verbosity_level(verbose)
     logger.info(f"Generating template: {name} in folder: {folder} for type: {q_type}")
@@ -100,11 +111,16 @@ def generate_template(name:pathlib.Path, folder: pathlib.Path, q_type: click.Cho
 
 @click.option('-v','--verbose',count=True, help='Enables verbose mode', required=False)
 def convert_single(input: pathlib.Path,verbose: int, output = pathlib.Path('.') ):  
-    """Convert a single file
+    """Convert a single markdown question file to QTI package.
 
-    Args:
-        input (click.Path): Input file path
-        output (click.Path, optional): Output file path. Defaults to pathlib.Path('.').
+    Parameters
+    ----------
+    input : pathlib.Path
+        Path to the input markdown file.
+    output : pathlib.Path, optional
+        Path to the output QTI package file. Defaults to input stem + .zip.
+    verbose : int
+        Verbosity level for logging.
     """
     set_verbosity_level(verbose)
     logger.info(f"Starting conversion of file: {input}")
@@ -138,11 +154,16 @@ def convert_single(input: pathlib.Path,verbose: int, output = pathlib.Path('.') 
 
 @click.option('-v','--verbose',count=True, help='Enables verbose mode', required=False)
 def convert_folder(input: pathlib.Path,verbose: int, output = pathlib.Path('.') ):  
-    """Convert all files in a folder
+    """Convert all markdown files in a folder to a single QTI package.
 
-    Args:
-        input (click.Path): Input folder path
-        output (click.Path, optional): Output file path. Defaults to pathlib.Path('.').
+    Parameters
+    ----------
+    input : pathlib.Path
+        Path to the input folder containing markdown files.
+    output : pathlib.Path, optional
+        Path to the output QTI package file. Defaults to folder stem + .zip.
+    verbose : int
+        Verbosity level for logging.
     """
     set_verbosity_level(verbose)
     logger.info(f"Starting conversion of file: {input}")

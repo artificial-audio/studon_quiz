@@ -8,14 +8,19 @@ import pathlib
 
 
 class QuestionBank:
-    """
-    A singleton class that manages a centralized repository of questions.
+    """Singleton repository managing questions and coordinating conversion.
 
-    This class ensures only one instance exists throughout the application lifecycle,
-    providing a global point of access to manage and store all questions in the system.
+    This class implements the singleton pattern to ensure only one instance
+    exists throughout the application lifecycle. It coordinates parsing
+    markdown files, creating question objects, and orchestrating their
+    conversion to QTI packages.
 
-    Attributes:
-        questions (list): A list to hold all questions managed by the singleton instance.
+    Attributes
+    ----------
+    questions : list
+        List of Question objects managed by this bank.
+    converter : QtiConverter
+        Test converter instance initialized at singleton creation.
     """
     question_type_abbr = [
         "mcq-sa",   # multiple choice (single answer)
@@ -33,12 +38,18 @@ class QuestionBank:
         return cls._instance
     
     def add_question(self, input_file: pathlib.Path):
+        """Parse a markdown file and add its question to the bank.
 
-        """
-        Add a question to the question bank.
+        The function parses the markdown file using `MarkdownReader`,
+        validates the question type, instantiates the appropriate
+        question class (McqSAQuestion or McqMAQuestion), and appends it
+        to the internal questions list.
 
         Args:
-            question: The question object to be added.
+            input_file: Path to the markdown file describing the question.
+
+        Raises:
+            ValueError: When the file has no `type` attribute or an unsupported type.
         """
         self.reader = MarkdownReader(str(input_file))
         attr = self.reader.get_attrs()
@@ -63,6 +74,11 @@ class QuestionBank:
             self._add_mcq_question(question)
     
     def _add_mcq_question(self, question):
+        """Helper to instantiate and add an MCQ question to the bank.
+
+        Args:
+            question: Dictionary containing question metadata and fields.
+        """
         correct_answer = []
         options = [{"text": option['ans'], "score": float(option['Score']), "feedback": option.get('Remark', '')} for option in question['options']]
         logger.info("Extracted options: {}", options)
@@ -92,6 +108,14 @@ class QuestionBank:
             self.questions.append(q)
 
     def save_package(self, output_path: pathlib.Path) -> bool:
+        """Orchestrate QTI XML generation and ZIP packaging.
+
+        Args:
+            output_path: Destination path for the generated QTI package.
+
+        Returns:
+            bool: True on successful save, False on error.
+        """
         success = True
         try:
             writer = QTIWriter(self.questions)

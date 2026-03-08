@@ -14,9 +14,16 @@ class QTIWriter:
         self.questions = questions
         self.author = author
         self.ilias_version = ilias_version
-
         
     def write_qti(self, output_file="output"):
+        """Generate QTI XML and write to a file.
+
+        Args:
+            output_file: Path to write the QTI XML file (default: 'output').
+
+        Raises:
+            ValueError: When any question is missing mandatory fields.
+        """
         root = etree.Element("questestinterop")
 
         for q_idx, question in enumerate(self.questions):
@@ -32,11 +39,19 @@ class QTIWriter:
 
 
     def write_ilias_zip(self, output_file="output"):
-        """
-        Writes the QTI XML into an ILIAS-compatible ZIP file:
-        - objects/ folder (contains referenced images)
-        - <zip_name>__qpl.xml (empty)
-        - <zip_name>__qti.xml (contains the full XML)
+        """Generate and package QTI XML with images into an ILIAS ZIP.
+
+        The generated ZIP archive has the structure:
+        - `<name>__qpl/` (directory)
+            - `objects/` (directory containing referenced image files)
+            - `<name>__qpl.xml` (empty metadata file)
+            - `<name>__qti.xml` (full QTI XML)
+
+        Args:
+            output_file: Path stem for the output ZIP and internal XML files.
+
+        Returns:
+            pathlib.Path: Path to the created ZIP file.
         """
         output_dir = Path(output_file).parent
         package_name = output_file.stem + '__qpl'
