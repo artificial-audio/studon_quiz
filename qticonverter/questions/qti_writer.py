@@ -166,7 +166,9 @@ class QTIWriter:
             
             for fb in self._create_feedbackOverall(question):
                 item.append(fb)
-            item.append(self._create_hint(question))
+            hint = self._create_hint(question)
+            if hint is not None:
+                item.append()
         tree = etree.ElementTree(root)
         tree.write(output_file, encoding="UTF-8", xml_declaration=True, pretty_print=True)
 
