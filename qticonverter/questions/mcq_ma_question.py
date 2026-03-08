@@ -88,7 +88,8 @@ class McqMAQuestion(Question):
             An lxml etree Element representing the complete QTI item
         """
         item = etree.Element("item", ident=ident, title=self.get_title(), maxattempts="0")
-        etree.SubElement(item, "qticomment")
+        qticomment = etree.SubElement(item, "qticomment")
+        qticomment.text = self.get_summary() or ""
         
         # Metadata
         itemmetadata = etree.SubElement(item, "itemmetadata")
