@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Bharadwaj LS
+# Copyright (c) 2026 Friedrich-Alexander-Universität Erlangen-Nürnberg
 # SPDX-License-Identifier: MIT
 
 """Service to convert all markdown files in a folder into a QTI package.

@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Bharadwaj LS
+# Copyright (c) 2026 Friedrich-Alexander-Universität Erlangen-Nürnberg
 # SPDX-License-Identifier: MIT
 
 """Service to convert a single markdown question file into a QTI package.

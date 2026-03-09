@@ -6,7 +6,7 @@ kept intentionally simple and are used by the question classes when
 building QTI packages.
 """
 
-# Copyright (c) 2026 Bharadwaj LS
+# Copyright (c) 2026 Friedrich-Alexander-Universität Erlangen-Nürnberg
 # SPDX-License-Identifier: MIT
 
 import re

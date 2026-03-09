@@ -1,4 +1,4 @@
-# Copyright (c) 2026 Bharadwaj LS
+# Copyright (c) 2026 Friedrich-Alexander-Universität Erlangen-Nürnberg
 # SPDX-License-Identifier: MIT
 
 """Command-line interface for QTI file conversion and template generation.
