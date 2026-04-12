@@ -38,7 +38,7 @@ class QTIWriter:
             root.append(item)
         
         tree = etree.ElementTree(root)
-        tree.write(output_file, encoding="UTF-8", xml_declaration=True, pretty_print=True)
+        tree.write(output_file, encoding="UTF-8", xml_declaration=True, pretty_print=False)
 
 
     def write_ilias_zip(self, output_file="output"):

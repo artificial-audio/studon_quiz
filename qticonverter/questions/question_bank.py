@@ -4,6 +4,7 @@
 from loguru import logger
 from .mcq_sa_question import McqSAQuestion
 from .mcq_ma_question import McqMAQuestion
+from .numeric_question import NumericQuestion
 from qticonverter.tools.qti_converter import QtiConverter
 from qticonverter.tools.markdown_reader import MarkdownReader
 from qticonverter.questions.qti_writer import QTIWriter
@@ -28,6 +29,7 @@ class QuestionBank:
     question_type_abbr = [
         "mcq-sa",   # multiple choice (single answer)
         "mcq-ma",   # multiple choice (multiple answers)
+        "num",      # numeric question
     ]
     _instance = None
     questions = []
@@ -72,9 +74,15 @@ class QuestionBank:
             'feedback': self.reader.get_feedback(),
             'hint': self.reader.get_hint()
         }
+
+        if question['type'] == 'num':
+            question['answer_params'] = self.reader.get_answer_params()
+
         logger.info("Loaded question attributes: {}", question)
         if question['type'] == 'mcq-sa' or question['type'] == 'mcq-ma':
             self._add_mcq_question(question)
+        elif question['type'] == 'num':
+            self._add_numeric_question(question)
     
     def _add_mcq_question(self, question):
         """Helper to instantiate and add an MCQ question to the bank.
@@ -109,6 +117,30 @@ class QuestionBank:
             q.set_feedback(question['feedback'])
             q.set_hint(question['hint'])
             self.questions.append(q)
+
+    def _add_numeric_question(self, question: dict):
+        """Helper to instantiate and add a numeric question to the bank.
+
+        Args:
+            question: Dictionary containing question metadata and fields.
+        """
+        q = NumericQuestion()
+        q.set_title(question['title'])
+        q.set_problem_statement(question['problem_statement'])
+        q.set_summary(question['summary'])
+        q.set_feedback(question['feedback'])
+        q.set_hint(question['hint'])
+
+        answer_params = question.get('answer_params', {})
+        q.set_correct_answer(float(answer_params.get('correct_answer', 0)))
+        q.set_points(float(answer_params.get('points', 1)))
+        if 'tolerance' in answer_params:
+            q.set_tolerance(float(answer_params['tolerance']))
+        if 'maxchars' in answer_params:
+            q.set_maxchars(int(answer_params['maxchars']))
+
+        logger.info("Added numeric question: {}", question['title'])
+        self.questions.append(q)
 
     def save_package(self, output_path: pathlib.Path) -> bool:
         """Orchestrate QTI XML generation and ZIP packaging.

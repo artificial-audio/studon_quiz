@@ -30,6 +30,10 @@ class TemplateGenerationService:
         "mcq-ma": {
             "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-ma.md",
             "resources": [pkg_resources.files("qticonverter") / "markdown_template/images/signal_plot.png" ]
+        },
+        "num": {
+            "template": pkg_resources.files("qticonverter") / "markdown_template/num.md",
+            "resources": []
         }
     }
     

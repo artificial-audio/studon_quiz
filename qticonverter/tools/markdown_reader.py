@@ -231,6 +231,49 @@ class MarkdownReader:
         logger.warning("No problem statement found")
         return ""
 
+    def get_answer_params(self) -> Dict[str, Any]:
+        """Extract numeric answer parameters from a level-2 'Answer' section.
+
+        Parses list items formatted as ``Key: Value`` under the Answer
+        heading and returns them as a dictionary with normalised keys.
+
+        Returns:
+            Dict[str, Any]: Mapping with possible keys: ``correct_answer``,
+                ``tolerance``, ``points``, ``maxchars``.
+        """
+        level = 2
+        pattern = r"answer"
+        recording = False
+        params: Dict[str, Any] = {}
+        for element in self._ast_tree:
+            if element['type'] == 'heading' and element['attrs']['level'] == level:
+                if re.search(pattern, element['children'][0]['raw'], re.IGNORECASE) and not recording:
+                    recording = True
+                    logger.debug("Found answer section")
+                    continue
+                elif recording:
+                    break
+            if recording and element['type'] == 'list':
+                for item in element['children']:
+                    for child in item['children']:
+                        if child['type'] in ('block_text', 'paragraph'):
+                            raw = ''.join(c.get('raw', '') for c in child['children'])
+                            parts = raw.split(':', 1)
+                            if len(parts) == 2:
+                                key = parts[0].strip().lower().replace(' ', '_')
+                                val = parts[1].strip()
+                                # Map friendly names to internal keys
+                                key_map = {
+                                    'correct_answer': 'correct_answer',
+                                    'tolerance': 'tolerance',
+                                    'points': 'points',
+                                    'max_characters': 'maxchars',
+                                }
+                                mapped = key_map.get(key, key)
+                                params[mapped] = val
+        logger.debug(f"Extracted answer params: {params}")
+        return params
+
     def get_options(self) -> List[Dict[str, Any]]:
         """Extract the options block from the markdown as a list of dicts.
 
