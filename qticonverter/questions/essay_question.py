@@ -3,8 +3,8 @@ from lxml import etree
 from qticonverter.questions.question import Question
 
 
-class TextQuestion(Question):
-    """Representation of a free‑text (string) question.
+class EssayQuestion(Question):
+    """Representation of an essay (free-text) question.
 
     The student enters a text answer. The QTI item uses a `response_str`
     element with `fibtype="String"`.
@@ -17,7 +17,7 @@ class TextQuestion(Question):
     def __init__(self):
         super().__init__()
         self.mandatory_fields = {
-            "type": "text",
+            "type": "essay",
             "title": None,
             "problem_statement": None,
             "correct_answer": None,

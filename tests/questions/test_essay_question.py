@@ -3,13 +3,13 @@
 
 import pytest
 from lxml import etree
-from qticonverter.questions.text_question import TextQuestion
+from qticonverter.questions.essay_question import EssayQuestion
 
 
 def test_initial_state():
-    q = TextQuestion()
+    q = EssayQuestion()
 
-    assert q.get_type() == "text"
+    assert q.get_type() == "essay"
     assert q.get_title() is None
     assert q.get_problem_statement() is None
     assert q.get_correct_answer() is None
@@ -23,7 +23,7 @@ def test_initial_state():
 
 
 def test_setters_and_getters():
-    q = TextQuestion()
+    q = EssayQuestion()
 
     q.set_title("Essay Question")
     q.set_problem_statement("Write an essay on the topic")
@@ -46,7 +46,7 @@ def test_setters_and_getters():
 
 
 def test_get_field_names():
-    q = TextQuestion()
+    q = EssayQuestion()
     field_names = q.get_field_names()
 
     expected = [
@@ -57,7 +57,7 @@ def test_get_field_names():
 
 
 def test_isValid_missing_mandatory():
-    q = TextQuestion()
+    q = EssayQuestion()
     q.set_title("Test")
     q.set_problem_statement("What is something?")
     # correct_answer still None
@@ -68,13 +68,13 @@ def test_isValid_missing_mandatory():
 
 
 def test_default_maxchars():
-    q = TextQuestion()
+    q = EssayQuestion()
     assert q.get_maxchars() == 500
 
 
-def _make_question(**kwargs) -> TextQuestion:
-    """Helper to create a fully populated TextQuestion."""
-    q = TextQuestion()
+def _make_question(**kwargs) -> EssayQuestion:
+    """Helper to create a fully populated EssayQuestion."""
+    q = EssayQuestion()
     q.set_title(kwargs.get("title", "Test Essay"))
     q.set_problem_statement(kwargs.get("problem_statement", "Write about the topic"))
     q.set_correct_answer(kwargs.get("correct_answer", "Model answer"))

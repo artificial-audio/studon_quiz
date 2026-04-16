@@ -51,7 +51,7 @@ question_type_abbr = [
     "mcq-sa",   # multiple choice (single answer)
     "mcq-ma",   # multiple choice (multiple answers)
     "num",      # numeric question
-    "text",     # free-text/essay question
+    "essay",     # essay/free-text question
 ]
 
 @cli.command()

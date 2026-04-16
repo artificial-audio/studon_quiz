@@ -1,4 +1,4 @@
-type: text
+type: essay
 
 # Essay Question Title
 Brief description of the essay topic

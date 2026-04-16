@@ -35,8 +35,8 @@ class TemplateGenerationService:
             "template": pkg_resources.files("qticonverter") / "markdown_template/num.md",
             "resources": []
         },
-        "text": {
-            "template": pkg_resources.files("qticonverter") / "markdown_template/text.md",
+        "essay": {
+            "template": pkg_resources.files("qticonverter") / "markdown_template/essay.md",
             "resources": []
         }
     }
