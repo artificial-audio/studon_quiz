@@ -51,13 +51,7 @@ question_type_abbr = [
     "mcq-sa",   # multiple choice (single answer)
     "mcq-ma",   # multiple choice (multiple answers)
     "num",      # numeric question
-    "ess",      # essay question
-    "lm",       # long menu
-    "cloze",    # cloze question
-    "tsq",      # text subset question
-    "match",    # matching question
-    "ord-v",    # ordering question (vertical)
-    "ord-h"     # ordering question (horizontal)
+    "text",     # free-text/essay question
 ]
 
 @cli.command()

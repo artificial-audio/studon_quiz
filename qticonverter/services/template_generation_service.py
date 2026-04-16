@@ -34,6 +34,10 @@ class TemplateGenerationService:
         "num": {
             "template": pkg_resources.files("qticonverter") / "markdown_template/num.md",
             "resources": []
+        },
+        "text": {
+            "template": pkg_resources.files("qticonverter") / "markdown_template/text.md",
+            "resources": []
         }
     }
     

@@ -5,6 +5,7 @@ from loguru import logger
 from .mcq_sa_question import McqSAQuestion
 from .mcq_ma_question import McqMAQuestion
 from .numeric_question import NumericQuestion
+from .text_question import TextQuestion
 from qticonverter.tools.qti_converter import QtiConverter
 from qticonverter.tools.markdown_reader import MarkdownReader
 from qticonverter.questions.qti_writer import QTIWriter
@@ -30,6 +31,7 @@ class QuestionBank:
         "mcq-sa",   # multiple choice (single answer)
         "mcq-ma",   # multiple choice (multiple answers)
         "num",      # numeric question
+        "text",     # free‑text question
     ]
     _instance = None
     questions = []
@@ -83,6 +85,8 @@ class QuestionBank:
             self._add_mcq_question(question)
         elif question['type'] == 'num':
             self._add_numeric_question(question)
+        elif question['type'] == 'text':
+            self._add_text_question(question)
     
     def _add_mcq_question(self, question):
         """Helper to instantiate and add an MCQ question to the bank.
@@ -140,6 +144,26 @@ class QuestionBank:
             q.set_maxchars(int(answer_params['maxchars']))
 
         logger.info("Added numeric question: {}", question['title'])
+        self.questions.append(q)
+
+    def _add_text_question(self, question: dict):
+        """Helper to instantiate and add a free‑text question to the bank.
+
+        Args:
+            question: Dictionary containing question metadata and fields.
+        """
+        q = TextQuestion()
+        q.set_title(question['title'])
+        q.set_problem_statement(question['problem_statement'])
+        q.set_summary(question['summary'])
+        q.set_feedback(question['feedback'])
+        q.set_hint(question['hint'])
+        answer_params = question.get('answer_params', {})
+        # correct answer as string
+        q.set_correct_answer(answer_params.get('correct_answer', ""))
+        if 'maxchars' in answer_params:
+            q.set_maxchars(int(answer_params['maxchars']))
+        logger.info("Added text question: {}", question['title'])
         self.questions.append(q)
 
     def save_package(self, output_path: pathlib.Path) -> bool:
