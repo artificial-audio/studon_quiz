@@ -64,7 +64,7 @@ This will process all Markdown files in the current directory and generate a QTI
 To convert a single Markdown question file to a QTI package, use the following command:
 
 ```bash
-qticonverter convert --input question.md --output question.zip
+qticonverter convert-single --input question.md --output question.zip
 ```
 
 This will create a QTI package named `question.zip` from the specified `question.md` file.
