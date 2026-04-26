@@ -51,7 +51,7 @@ def test_get_field_names():
 
     expected = [
         'type', 'title', 'problem_statement', 'correct_answer',
-        'summary', 'feedback', 'hint', 'maxchars'
+        'summary', 'feedback', 'hint', 'maxchars', 'maxpoints'
     ]
     assert set(field_names) == set(expected)
 

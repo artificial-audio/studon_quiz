@@ -79,6 +79,9 @@ class QuestionBank:
 
         if question['type'] == 'num':
             question['answer_params'] = self.reader.get_answer_params()
+        
+        if question['type'] == 'essay':
+            question['essay_params'] = self.reader.get_essay_params()
 
         logger.info("Loaded question attributes: {}", question)
         if question['type'] == 'mcq-sa' or question['type'] == 'mcq-ma':
@@ -158,11 +161,14 @@ class QuestionBank:
         q.set_summary(question['summary'])
         q.set_feedback(question['feedback'])
         q.set_hint(question['hint'])
-        answer_params = question.get('answer_params', {})
+        essay_params = question.get('essay_params', {})
         # correct answer as string
+        answer_params = question.get('answer_params', {})
         q.set_correct_answer(answer_params.get('correct_answer', ""))
-        if 'maxchars' in answer_params:
-            q.set_maxchars(int(answer_params['maxchars']))
+        if 'maxchars' in essay_params:
+            q.set_maxchars(int(essay_params['maxchars']))
+        if 'maxpoints' in essay_params:
+            q.set_maxpoints(int(essay_params['maxpoints']))
         logger.info("Added essay question: {}", question['title'])
         self.questions.append(q)
 

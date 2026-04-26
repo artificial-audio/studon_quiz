@@ -7,6 +7,11 @@ Brief description of the essay topic
 
 Write an essay explaining the key concepts related to the topic. Your answer should be comprehensive and well-structured.
 
+## Settings
+
+- Max Points: 10
+- Max Characters: 500
+
 ## Feedback (Optional)
 
 ### Correct Answer (Optional)

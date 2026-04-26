@@ -27,6 +27,7 @@ class EssayQuestion(Question):
             "feedback": None,
             "hint": None,
             "maxchars": None,
+            "maxpoints": 10,  # Default: 10 points
         }
 
     # -- accessors ----------------------------------------------------------
@@ -88,6 +89,12 @@ class EssayQuestion(Question):
 
     def get_maxchars(self) -> int:
         return self.optional_fields["maxchars"] if self.optional_fields["maxchars"] is not None else 500
+
+    def set_maxpoints(self, maxpoints: int):
+        self.optional_fields["maxpoints"] = int(maxpoints)
+
+    def get_maxpoints(self) -> int:
+        return self.optional_fields["maxpoints"] if self.optional_fields["maxpoints"] is not None else 10
 
     def get_options(self) -> None:
         return None
@@ -188,12 +195,13 @@ class EssayQuestion(Question):
         
         # Outcomes with WritingScore - use explicit closing tag
         outcomes = etree.SubElement(resprocessing, "outcomes")
+        max_points_str = str(self.get_maxpoints())
         decvar = etree.SubElement(
             outcomes, "decvar", 
             varname="WritingScore", 
             vartype="Integer", 
             minvalue="0", 
-            maxvalue="10"
+            maxvalue=max_points_str
         )
         # Ensure explicit closing tag by setting text
         decvar.text = None
@@ -202,7 +210,7 @@ class EssayQuestion(Question):
         rc1 = etree.SubElement(resprocessing, "respcondition", **{"continue": "Yes"})
         cv1 = etree.SubElement(rc1, "conditionvar")
         varequal1 = etree.SubElement(cv1, "varequal", respident="points")
-        varequal1.text = "10"
+        varequal1.text = max_points_str
         etree.SubElement(rc1, "displayfeedback", feedbacktype="Response", linkrefid="response_allcorrect")
         
         # Condition 2: Points not full (tutor gave partial/no score)
@@ -210,7 +218,7 @@ class EssayQuestion(Question):
         cv2 = etree.SubElement(rc2, "conditionvar")
         not_el = etree.SubElement(cv2, "not")
         varequal2 = etree.SubElement(not_el, "varequal", respident="points")
-        varequal2.text = "10"
+        varequal2.text = max_points_str
         etree.SubElement(rc2, "displayfeedback", feedbacktype="Response", linkrefid="response_onenotcorrect")
         
         # Condition 3: Mark as tutor_rated
