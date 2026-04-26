@@ -255,6 +255,18 @@ class NumericQuestion(Question):
         mat_allcorrect = etree.SubElement(fm_allcorrect, "material")
         mt_allcorrect = etree.SubElement(mat_allcorrect, "mattext", texttype="text/xhtml")
         mt_allcorrect.text = f"<p>{correct_text}</p>" if correct_text else ""
+        
+        # Extract images from Correct feedback
+        if correct_text:
+            images = self._extract_images_with_dimensions(correct_text)
+            for img_data in images:
+                attrs = {"label": img_data['src'], "uri": f"objects/{img_data['filename']}"}
+                if img_data['width']:
+                    attrs['width'] = img_data['width']
+                if img_data['height']:
+                    attrs['height'] = img_data['height']
+                etree.SubElement(mat_allcorrect, "matimage", **attrs)
+        
         feedbacks.append(fb_allcorrect)
 
         # Incorrect feedback
@@ -266,6 +278,18 @@ class NumericQuestion(Question):
         mat_wrong = etree.SubElement(fm_wrong, "material")
         mt_wrong = etree.SubElement(mat_wrong, "mattext", texttype="text/xhtml")
         mt_wrong.text = f"<p>{wrong_text}</p>" if wrong_text else ""
+        
+        # Extract images from Wrong feedback
+        if wrong_text:
+            images = self._extract_images_with_dimensions(wrong_text)
+            for img_data in images:
+                attrs = {"label": img_data['src'], "uri": f"objects/{img_data['filename']}"}
+                if img_data['width']:
+                    attrs['width'] = img_data['width']
+                if img_data['height']:
+                    attrs['height'] = img_data['height']
+                etree.SubElement(mat_wrong, "matimage", **attrs)
+        
         feedbacks.append(fb_wrong)
 
         return feedbacks

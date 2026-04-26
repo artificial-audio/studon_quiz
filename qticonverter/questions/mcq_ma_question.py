@@ -324,6 +324,18 @@ class McqMAQuestion(Question):
         material_correct = etree.SubElement(flow_mat_correct, "material")
         mattext_correct = etree.SubElement(material_correct, "mattext", texttype="text/xhtml")
         mattext_correct.text = f"<p>{correct_feedback}</p>"
+        
+        # Extract images from Correct feedback
+        if correct_feedback:
+            images = self._extract_images_with_dimensions(correct_feedback)
+            for img_data in images:
+                attrs = {"label": img_data['src'], "uri": f"objects/{img_data['filename']}"}
+                if img_data['width']:
+                    attrs['width'] = img_data['width']
+                if img_data['height']:
+                    attrs['height'] = img_data['height']
+                etree.SubElement(material_correct, "matimage", **attrs)
+        
         feedbacks.append(itemfeedback_correct)
         
         # Always create response_onenotcorrect element
@@ -336,6 +348,18 @@ class McqMAQuestion(Question):
         material_wrong = etree.SubElement(flow_mat_wrong, "material")
         mattext_wrong = etree.SubElement(material_wrong, "mattext", texttype="text/xhtml")
         mattext_wrong.text = f"<p>{wrong_feedback}</p>"
+        
+        # Extract images from Wrong feedback
+        if wrong_feedback:
+            images = self._extract_images_with_dimensions(wrong_feedback)
+            for img_data in images:
+                attrs = {"label": img_data['src'], "uri": f"objects/{img_data['filename']}"}
+                if img_data['width']:
+                    attrs['width'] = img_data['width']
+                if img_data['height']:
+                    attrs['height'] = img_data['height']
+                etree.SubElement(material_wrong, "matimage", **attrs)
+        
         feedbacks.append(itemfeedback_wrong)
         
         return feedbacks

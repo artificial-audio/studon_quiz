@@ -100,13 +100,14 @@ class QTIImageExtractor:
     def collect_all_images_from_question(question) -> set:
         """Collect unique image `title` references used in a question.
 
-        The function inspects the problem statement and each option to
-        gather image `title` values (as produced by
+        The function inspects the problem statement, summary, options,
+        feedback, and hints to gather image `title` values (as produced by
         :func:`extract_image_uris`).
 
         Args:
-            question: Question-like object exposing `get_problem_statement()` and
-                `get_options()` methods.
+            question: Question-like object exposing getter methods like 
+                `get_problem_statement()`, `get_options()`, `get_feedback()`,
+                `get_summary()`, and `get_hint()`.
 
         Returns:
             set[str]: Set of unique image title strings referenced by the
@@ -114,15 +115,41 @@ class QTIImageExtractor:
         """
         img_sources = set()
         
+        # Extract images from summary
+        if hasattr(question, 'get_summary'):
+            summary = question.get_summary()
+            img_sources.update(QTIImageExtractor.extract_image_uris(summary))
+        
         # Extract images from problem statement
         problem_statement = question.get_problem_statement()
         img_sources.update(QTIImageExtractor.extract_image_uris(problem_statement))
         
-        # Extract images from options
+        # Extract images from options (both option text and option feedback/remarks)
         options = question.get_options() or []
         for opt in options:
-            opt_text = opt if isinstance(opt, str) else opt.get('text', '')
-            img_sources.update(QTIImageExtractor.extract_image_uris(opt_text))
+            if isinstance(opt, str):
+                img_sources.update(QTIImageExtractor.extract_image_uris(opt))
+            elif isinstance(opt, dict):
+                # Extract from option text
+                opt_text = opt.get('text', '') or opt.get('ans', '')
+                img_sources.update(QTIImageExtractor.extract_image_uris(opt_text))
+                # Extract from option feedback/remark
+                opt_feedback = opt.get('Remark', '') or opt.get('feedback', '')
+                img_sources.update(QTIImageExtractor.extract_image_uris(opt_feedback))
+        
+        # Extract images from general feedback (Correct/Wrong)
+        if hasattr(question, 'get_feedback'):
+            feedback = question.get_feedback() or {}
+            if isinstance(feedback, dict):
+                for feedback_type, feedback_text in feedback.items():
+                    img_sources.update(QTIImageExtractor.extract_image_uris(feedback_text))
+        
+        # Extract images from hints
+        if hasattr(question, 'get_hint'):
+            hint_data = question.get_hint() or {}
+            if isinstance(hint_data, dict):
+                hint_text = hint_data.get('hint', '')
+                img_sources.update(QTIImageExtractor.extract_image_uris(hint_text))
         
         return img_sources
 

@@ -545,6 +545,10 @@ class MarkdownReader:
         if nextFeedbackType:
             feedback[nextFeedbackType] = self._ast_to_text(content)
         
+        # Convert Obsidian-style image links to HTML <img> tags in all feedback
+        for key in feedback:
+            feedback[key] = replace_obsidian_images(feedback[key])
+        
         logger.debug(f"Extracted {len(feedback)} feedback sections")
         return feedback
 
