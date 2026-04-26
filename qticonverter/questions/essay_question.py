@@ -41,8 +41,11 @@ class EssayQuestion(Question):
 
     def set_summary(self, summary: str | None):
         if summary:
-            # Remove newlines and normalize whitespace
-            self.optional_fields["summary"] = " ".join(summary.split())
+            # Preserve paragraph breaks by normalizing whitespace per line
+            # while keeping newline separators
+            lines = summary.split('\n')
+            normalized_lines = [' '.join(line.split()) for line in lines]
+            self.optional_fields["summary"] = '\n'.join(normalized_lines)
         else:
             self.optional_fields["summary"] = summary
 
@@ -51,8 +54,11 @@ class EssayQuestion(Question):
 
     def set_problem_statement(self, problem_statement: str):
         if problem_statement:
-            # Remove newlines and normalize whitespace
-            self.mandatory_fields["problem_statement"] = " ".join(problem_statement.split())
+            # Preserve paragraph breaks by normalizing whitespace per line/paragraph
+            # while keeping newline separators
+            lines = problem_statement.split('\n')
+            normalized_lines = [' '.join(line.split()) for line in lines]
+            self.mandatory_fields["problem_statement"] = '\n'.join(normalized_lines)
         else:
             self.mandatory_fields["problem_statement"] = problem_statement
 

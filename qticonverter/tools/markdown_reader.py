@@ -124,7 +124,10 @@ class MarkdownReader:
                 try:
                     if element['type'] == 'blank_line':
                         content.append({'type': 'linebreak'})
-                    else:
+                    elif element['type'] == 'list':
+                        # Append list node itself so it can be converted to HTML by _list_to_html()
+                        content.append(element)
+                    elif 'children' in element:
                         content.extend(element['children'])
                 except Exception as e:
                     logger.debug(f"Failed to process element: {e}")
@@ -132,15 +135,17 @@ class MarkdownReader:
         return description
 
     def _ast_to_text(self, ast_nodes: List[Dict[str, Any]]) -> str:
-        """Convert a list of AST nodes into plain text.
+        """Convert a list of AST nodes into HTML text.
 
         Supports text nodes, line breaks, lists and inline HTML.
+        Lists are converted to proper <ul> or <ol> HTML tags to match
+        ILIAS QTI format expectations.
 
         Args:
             ast_nodes: A list of nodes produced by the `mistune` AST renderer.
 
         Returns:
-            str: The joined textual representation of the nodes.
+            str: The joined HTML representation of the nodes.
         """
         retStr = ''
         for node in ast_nodes:
@@ -148,11 +153,44 @@ class MarkdownReader:
                 retStr += node['raw']
             elif node['type'] == 'linebreak':
                 retStr += '\n'
+            elif node['type'] == 'list':
+                # Convert list nodes to HTML <ul> or <ol> tags
+                retStr += self._list_to_html(node)
             elif node['type'] == 'list_item':
                 retStr += self._unwrap_list_to_text(node, 0)
             elif node['type'] == 'inline_html':
                 retStr += node['raw']
         return retStr
+
+    def _list_to_html(self, node: Dict[str, Any]) -> str:
+        """Convert a list AST node to HTML <ul> or <ol> tags.
+
+        Args:
+            node: AST node of type 'list'.
+
+        Returns:
+            str: HTML string with <ul>/<ol> and <li> tags.
+        """
+        is_ordered = node.get('ordered', False)
+        tag = 'ol' if is_ordered else 'ul'
+        html = f'<{tag}>\n'
+        
+        for item in node['children']:
+            if item['type'] == 'list_item':
+                html += '<li>'
+                # Process the list item content
+                for child in item['children']:
+                    if child['type'] == 'block_text':
+                        # Recursively process block_text children to preserve LaTeX
+                        html += self._ast_to_text(child['children'])
+                    elif child['type'] == 'list':
+                        # Handle nested lists
+                        html += self._list_to_html(child)
+                html += '</li>\n'
+        
+        html += f'</{tag}>\n'
+        return html
+
 
     def _unwrap_list_to_text(self, node: Dict[str, Any], tabCount: int) -> str:
         """Recursively flatten list AST nodes into text with indentation.
@@ -381,7 +419,10 @@ class MarkdownReader:
                     try:
                         if element['type'] == 'blank_line':
                             content.append({'type': 'linebreak'})
-                        else:
+                        elif element['type'] == 'list':
+                            # Append list node itself so it can be converted to HTML by _list_to_html()
+                            content.append(element)
+                        elif 'children' in element:
                             content.extend(element['children'])
                     except Exception as e:
                         logger.debug(f"Failed to process feedback element: {e}")
