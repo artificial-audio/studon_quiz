@@ -167,7 +167,8 @@ class MarkdownReader:
         retStr = ''
         for child in node['children']:
             if child['type'] == 'block_text':
-                retStr += child['children'][0]['raw'] + '\n'
+                # Process all children of block_text (text, inline_html, etc.) to preserve LaTeX
+                retStr += self._ast_to_text(child['children']) + '\n'
             elif child['type'] == 'list':
                 tabCount += 1
                 for sublist in child['children']:

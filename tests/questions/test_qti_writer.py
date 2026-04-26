@@ -66,13 +66,14 @@ def test_qti_writer_creates_xml(tmp_path):
         assert matimage.get("uri") == image_option["image"]
     
     # Check resprocessing has correct number of respcondition
+    # Should have one for each option plus two for overall feedback (response_allcorrect and response_onenotcorrect)
     resprocessing = item.find("resprocessing")
     respconditions = resprocessing.findall("respcondition")
-    assert len(respconditions) == len(q.get_options())
+    assert len(respconditions) == len(q.get_options()) + 2  # +2 for overall feedback respconditions
     
-    # Check itemfeedback exists for each option
+    # Check itemfeedback exists for each option plus two overall feedback elements
     itemfeedbacks = item.findall("itemfeedback")
-    assert len(itemfeedbacks) == len(q.get_options())
+    assert len(itemfeedbacks) == len(q.get_options()) + 2  # +2 for overall feedback elements
     
     # Optionally, check XML can be serialized
     xml_str = etree.tostring(root, encoding="UTF-8", pretty_print=True).decode()

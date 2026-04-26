@@ -9,7 +9,6 @@ def test_single_question_conversion_service(tmp_path: Path) -> None:
     inputFile = pkg_resources.files("qticonverter")/"markdown_template/mcq-sa.md"
     assert Path(inputFile).exists()
     outputFile = tmp_path/'output.zip'
-    outputFile = Path('/home/bharad/Work/FAU/QTIConverter/temp/demo/output.zip')
     service = SingleQuestionConversionService(input_file=inputFile, output_file=outputFile)
     service.convert()
     newPath = outputFile.parent /(outputFile.stem+'__qpl.zip')
