@@ -5,3 +5,5 @@ temp/
 !*.toml
 !*.md
 !.gitignore
+/VAL
+/StoPro
