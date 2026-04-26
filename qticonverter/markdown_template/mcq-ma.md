@@ -20,33 +20,15 @@ The impulse response is shown above for  $a = 0.8$.
 
 ## Options
 
-- DTFT is periodic with period $2\pi$ in the frequency domain
-	- Score: 1
-	- Remark: Correct. The DTFT has a periodicity of $2\pi$ because $e^{j(\omega + 2\pi)n} = e^{j\omega n}$ for all integer $n$.
-
-- The closed-form is $\frac{1}{1 - ae^{-j\omega}}$ for $|a| < 1$
-	- Score: 1
-	- Remark: Correct. This can be derived using the geometric series formula.
-
-- Magnitude response minimum value occurs at $\omega = \pi$
-	- Score: 1
-	- Remark: Correct. At $\omega = \pi$, the denominator becomes maximum, making $|X(e^{j\omega})|$ minimum.
-
-- Increasing $a$ towards 1 makes the magnitude response peak sharper
-	- Score: 1
-	- Remark: Correct. As $a \to 1$, the pole moves closer to the unit circle, creating a sharper resonance peak.
-
-- The phase response is always linear with respect to $\omega$
-	- Score: 0
-	- Remark: Incorrect. The phase response is nonlinear: $\angle X(e^{j\omega}) = -\arctan\left(\frac{a\sin\omega}{1-a\cos\omega}\right)$.
-
-- Energy is distributed uniformly across all frequencies
-	- Score: 0
-	- Remark: Incorrect. Energy is concentrated near $\omega = 0$ due to the pole location.
-
-- Time-shift property: $Y(e^{j\omega}) = e^{-j2\omega} X(e^{j\omega})$ for $y[n] = x[n-2]$
-	- Score: 1
-	- Remark: Correct. This demonstrates the DTFT time-shift property.
+| Option | Score | Feedback |
+|--------|-------|----------|
+| DTFT is periodic with period $2\pi$ in the frequency domain | 1 | Correct. The DTFT has a periodicity of $2\pi$ because $e^{j(\omega + 2\pi)n} = e^{j\omega n}$ for all integer $n$. |
+| The closed-form is $\frac{1}{1 - ae^{-j\omega}}$ for $\|a\| < 1$ | 1 | Correct. This can be derived using the geometric series formula. |
+| Magnitude response minimum value occurs at $\omega = \pi$ | 1 | Correct. At $\omega = \pi$, the denominator becomes maximum, making $\|X(e^{j\omega})\|$ minimum. |
+| Increasing $a$ towards 1 makes the magnitude response peak sharper | 1 | Correct. As $a \to 1$, the pole moves closer to the unit circle, creating a sharper resonance peak. |
+| The phase response is always linear with respect to $\omega$ | 0 | Incorrect. The phase response is nonlinear: $\angle X(e^{j\omega}) = -\arctan\left(\frac{a\sin\omega}{1-a\cos\omega}\right)$. |
+| Energy is distributed uniformly across all frequencies | 0 | Incorrect. Energy is concentrated near $\omega = 0$ due to the pole location. |
+| Time-shift property: $Y(e^{j\omega}) = e^{-j2\omega} X(e^{j\omega})$ for $y[n] = x[n-2]$ | 1 | Correct. This demonstrates the DTFT time-shift property. |
 
 ## Feedback (Optional)
 

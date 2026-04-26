@@ -27,9 +27,10 @@ class MarkdownReader:
         try:
             with open(self._fname, "r", encoding='UTF-8') as f:
                 self._content = f.read()
-                renderer = mistune.create_markdown(renderer='ast')
+                # Enable table plugin for markdown table support
+                md = mistune.create_markdown(renderer='ast', plugins=['table'])
                 self._content_n = self.replace_latex(self._content)
-                self._ast_tree = renderer(self._content_n)
+                self._ast_tree = md(self._content_n)
             logger.debug(f"Successfully parsed markdown file: {self._fname}")
         except Exception as e:
             logger.error(f"Failed to read file '{self._fname}': {e}")
@@ -358,29 +359,101 @@ class MarkdownReader:
         """Extract the options block from the markdown as a list of dicts.
 
         The function searches for a level-2 heading containing the word
-        "options" and then parses the following list into option
+        "options" and then parses either a list or table into option
         dictionaries. Each option dictionary may contain answer text and
-        additional key/value attributes.
+        additional key/value attributes (score, feedback, etc).
 
         Returns:
             List[Dict[str, Any]]: List of option dictionaries.
         """
         level = 2
         pattern = r"options"
-        build_opt_dict = False
         options = []
-        for element in self._ast_tree:
+        found_options = False
+        
+        for i, element in enumerate(self._ast_tree):
             if element['type'] == 'heading' and element['attrs']['level'] == level and re.search(pattern, element['children'][0]['raw'], re.IGNORECASE):
-                build_opt_dict = True
+                found_options = True
                 logger.debug("Found options section")
-                continue
-            elif element['type'] == 'heading' and build_opt_dict:
+                # Skip blank lines and find table or list
+                j = i + 1
+                while j < len(self._ast_tree) and self._ast_tree[j]['type'] == 'blank_line':
+                    j += 1
+                
+                if j < len(self._ast_tree):
+                    next_elem = self._ast_tree[j]
+                    if next_elem['type'] == 'table':
+                        # Parse table format
+                        options = self._parse_options_table(next_elem)
+                    elif next_elem['type'] == 'list':
+                        # Parse list format (legacy)
+                        for option in next_elem['children']:
+                            options.append(self._get_option_dict(option, 0))
                 break
-            if build_opt_dict and element['type'] == 'list':
-                for option in element['children']:
-                    options.append(self._get_option_dict(option, 0))
+            elif found_options and element['type'] == 'heading':
+                break
+                
         logger.debug(f"Extracted {len(options)} options")
         return options
+
+    def _parse_options_table(self, table_node: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Parse options from a markdown table AST node.
+
+        Expected table structure:
+        | Option | Score | Feedback |
+        |--------|-------|----------|
+        | Option text | score | feedback text |
+
+        Args:
+            table_node: AST node of type 'table'.
+
+        Returns:
+            List[Dict[str, Any]]: List of parsed option dictionaries with keys 
+                'ans', 'Score' (uppercase for compatibility), and 'Remark'.
+        """
+        options = []
+        
+        # Find table_body in children
+        table_body = None
+        for child in table_node.get('children', []):
+            if child['type'] == 'table_body':
+                table_body = child
+                break
+        
+        if not table_body:
+            logger.debug("No table body found")
+            return options
+        
+        # Parse each table_row in the body
+        for row_node in table_body.get('children', []):
+            if row_node['type'] != 'table_row':
+                continue
+            
+            cells = row_node.get('children', [])
+            if len(cells) < 3:
+                continue
+            
+            # Extract cell contents
+            cell_contents = []
+            for cell in cells:
+                if cell['type'] == 'table_cell':
+                    # Extract text from cell children
+                    cell_text = self._ast_to_text(cell.get('children', []))
+                    cell_contents.append(cell_text.strip())
+            
+            if len(cell_contents) >= 3:
+                # Columns: Option text, Score, Feedback
+                # Use capitalized 'Score' and 'Remark' for compatibility with question_bank
+                option_dict = {
+                    'ans': replace_obsidian_images(cell_contents[0]),
+                    'Score': cell_contents[1],
+                    'Remark': cell_contents[2]
+                }
+                options.append(option_dict)
+        
+        logger.debug(f"Parsed {len(options)} options from table")
+        return options
+
         
     def _get_option_dict(self, node: Dict[str, Any], tabCount: int) -> Dict[str, Any]:
         """Convert a list item AST node into an option dictionary.
