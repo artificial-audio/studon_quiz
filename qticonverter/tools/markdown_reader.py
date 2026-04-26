@@ -384,6 +384,11 @@ class MarkdownReader:
                             content.extend(element['children'])
                     except Exception as e:
                         logger.debug(f"Failed to process feedback element: {e}")
+        
+        # Save any pending feedback at the end of the loop
+        if nextFeedbackType:
+            feedback[nextFeedbackType] = self._ast_to_text(content)
+        
         logger.debug(f"Extracted {len(feedback)} feedback sections")
         return feedback
 

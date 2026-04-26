@@ -229,9 +229,14 @@ class McqSAQuestion(Question):
         etree.SubElement(outcomes, "decvar")
 
         options = self.get_options() or []
+        correct_indices = []
+        
         for idx, opt in enumerate(options):
             # If option has score
             score = opt.get("score", 0) if isinstance(opt, dict) else 0
+            if score > 0:
+                correct_indices.append(idx)
+                
             respcondition = etree.SubElement(resprocessing, "respcondition", **{"continue": "Yes"})
             conditionvar = etree.SubElement(respcondition, "conditionvar")
             varequal = etree.SubElement(conditionvar, "varequal", respident="MCSR")
@@ -239,6 +244,25 @@ class McqSAQuestion(Question):
             setvar = etree.SubElement(respcondition, "setvar", action="Add")
             setvar.text = str(score)
             displayfeedback = etree.SubElement(respcondition, "displayfeedback", feedbacktype="Response", linkrefid=f"response_{idx}")
+        
+        # Add respcondition for overall correct feedback
+        if correct_indices:
+            rc_correct = etree.SubElement(resprocessing, "respcondition", **{"continue": "Yes"})
+            cv_correct = etree.SubElement(rc_correct, "conditionvar")
+            # For single answer, assume first correct index is the right one
+            varequal_correct = etree.SubElement(cv_correct, "varequal", respident="MCSR")
+            varequal_correct.text = str(correct_indices[0])
+            etree.SubElement(rc_correct, "displayfeedback", feedbacktype="Response", linkrefid="response_allcorrect")
+        
+        # Add respcondition for overall wrong feedback
+        if correct_indices:
+            rc_wrong = etree.SubElement(resprocessing, "respcondition", **{"continue": "Yes"})
+            cv_wrong = etree.SubElement(rc_wrong, "conditionvar")
+            not_elem = etree.SubElement(cv_wrong, "not")
+            varequal_wrong = etree.SubElement(not_elem, "varequal", respident="MCSR")
+            varequal_wrong.text = str(correct_indices[0])
+            etree.SubElement(rc_wrong, "displayfeedback", feedbacktype="Response", linkrefid="response_onenotcorrect")
+        
         return resprocessing
 
     def _create_itemfeedback(self) -> list:
@@ -275,22 +299,31 @@ class McqSAQuestion(Question):
         """
         feedbacks = []
         feedback = self.get_feedback()
-        if feedback and isinstance(feedback, dict):
-            if 'Correct' in feedback:
-                correct_feedback = feedback['Correct']
-                itemfeedback_correct = etree.Element("itemfeedback", ident="response_allcorrect", view="All")
-                flow_mat_correct = etree.SubElement(itemfeedback_correct, "flow_mat")
-                material_correct = etree.SubElement(flow_mat_correct, "material")
-                etree.SubElement(material_correct, "mattext", texttype="text/xhtml").text = f"<p>{correct_feedback}</p>"
-                feedbacks.append(itemfeedback_correct)
-
-            if 'Wrong' in feedback:
-                wrong_feedback = feedback['Wrong']
-                itemfeedback_wrong = etree.Element("itemfeedback", ident="response_onenotcorrect", view="All")
-                flow_mat_wrong = etree.SubElement(itemfeedback_wrong, "flow_mat")
-                material_wrong = etree.SubElement(flow_mat_wrong, "material")
-                etree.SubElement(material_wrong, "mattext", texttype="text/xhtml").text = f"<p>{wrong_feedback}</p>"
-                feedbacks.append(itemfeedback_wrong)
+        
+        # Always create response_allcorrect element
+        correct_feedback = ""
+        if isinstance(feedback, dict) and 'Correct' in feedback:
+            correct_feedback = feedback['Correct']
+        
+        itemfeedback_correct = etree.Element("itemfeedback", ident="response_allcorrect", view="All")
+        flow_mat_correct = etree.SubElement(itemfeedback_correct, "flow_mat")
+        material_correct = etree.SubElement(flow_mat_correct, "material")
+        mattext_correct = etree.SubElement(material_correct, "mattext", texttype="text/xhtml")
+        mattext_correct.text = f"<p>{correct_feedback}</p>"
+        feedbacks.append(itemfeedback_correct)
+        
+        # Always create response_onenotcorrect element
+        wrong_feedback = ""
+        if isinstance(feedback, dict) and 'Wrong' in feedback:
+            wrong_feedback = feedback['Wrong']
+        
+        itemfeedback_wrong = etree.Element("itemfeedback", ident="response_onenotcorrect", view="All")
+        flow_mat_wrong = etree.SubElement(itemfeedback_wrong, "flow_mat")
+        material_wrong = etree.SubElement(flow_mat_wrong, "material")
+        mattext_wrong = etree.SubElement(material_wrong, "mattext", texttype="text/xhtml")
+        mattext_wrong.text = f"<p>{wrong_feedback}</p>"
+        feedbacks.append(itemfeedback_wrong)
+        
         return feedbacks
     
     def _create_hint(self) -> etree._Element:
