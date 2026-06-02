@@ -29,7 +29,8 @@ class MarkdownReader:
                 self._content = f.read()
                 # Enable table plugin for markdown table support
                 md = mistune.create_markdown(renderer='ast', plugins=['table'])
-                self._content_n = self.replace_latex(self._content)
+                # First protect LaTeX from hard break processing, then process inline math
+                self._content_n = self.replace_latex(self.protect_display_math(self._content))
                 self._ast_tree = md(self._content_n)
             logger.debug(f"Successfully parsed markdown file: {self._fname}")
         except Exception as e:
@@ -51,6 +52,45 @@ class MarkdownReader:
             str: Transformed content with inline LaTeX wrapped in a span.
         """
         return re.sub(r'(?<!\$)\$(?!\$)(.*?)(?<!\$)\$', r'<span class="latex">\1</span>', content)
+
+    def protect_display_math(self, content: str) -> str:
+        """Protect LaTeX line breaks in display math from Markdown hard break processing.
+
+        Mistune treats `\\` at end of line as a Markdown hard break marker and
+        consumes one backslash. In LaTeX math, `\\` is literal and should be
+        preserved. This method uses a different approach: wrap display math
+        blocks in HTML comment markers so mistune treats them as raw content.
+
+        Args:
+            content: Markdown content with display math blocks.
+
+        Returns:
+            str: Content with display math protected from Markdown processing.
+        """
+        # Strategy: Temporarily replace display math with HTML comments containing the original
+        # This prevents mistune from parsing the inside of display math
+        placeholder_map = {}
+        placeholder_idx = 0
+        result = content
+        
+        # Find and protect all $$...$$ blocks
+        pattern = r'\$\$(.*?)\$\$'
+        
+        def replace_with_placeholder(match):
+            nonlocal placeholder_idx
+            math_content = match.group(1)
+            # Use HTML comment-style placeholder that mistune won't parse
+            placeholder = f"<!--LATEX_MATH_{placeholder_idx}-->"
+            placeholder_map[placeholder] = f"$${math_content}$$"
+            placeholder_idx += 1
+            return placeholder
+        
+        result = re.sub(pattern, replace_with_placeholder, result, flags=re.DOTALL)
+        
+        # Store placeholder map for later restoration
+        self._latex_placeholder_map = placeholder_map
+        
+        return result
 
     def get_attrs(self) -> Dict[str, str]:
         """Extract leading key:value attributes from the top of the file.
@@ -128,6 +168,9 @@ class MarkdownReader:
                     elif element['type'] == 'list':
                         # Append list node itself so it can be converted to HTML by _list_to_html()
                         content.append(element)
+                    elif element['type'] == 'block_html':
+                        # Append HTML blocks (e.g., protected display math) as raw content
+                        content.append(element)
                     elif 'children' in element:
                         content.extend(element['children'])
                 except Exception as e:
@@ -138,9 +181,11 @@ class MarkdownReader:
     def _ast_to_text(self, ast_nodes: List[Dict[str, Any]]) -> str:
         """Convert a list of AST nodes into HTML text.
 
-        Supports text nodes, line breaks, lists and inline HTML.
+        Supports text nodes, line breaks, lists, inline HTML, softbreaks, and raw content.
         Lists are converted to proper <ul> or <ol> HTML tags to match
         ILIAS QTI format expectations.
+
+        Restores display math from protected HTML comment placeholders.
 
         Args:
             ast_nodes: A list of nodes produced by the `mistune` AST renderer.
@@ -151,9 +196,26 @@ class MarkdownReader:
         retStr = ''
         for node in ast_nodes:
             if node['type'] == 'text':
-                retStr += node['raw']
+                content = node['raw']
+                # Restore LaTeX from HTML comment placeholders
+                if hasattr(self, '_latex_placeholder_map'):
+                    for placeholder, original in self._latex_placeholder_map.items():
+                        content = content.replace(placeholder, original)
+                retStr += content
+            elif node['type'] == 'block_html':
+                # Restore display math from HTML comment blocks
+                if hasattr(self, '_latex_placeholder_map'):
+                    content = node['raw']
+                    for placeholder, original in self._latex_placeholder_map.items():
+                        content = content.replace(placeholder, original)
+                    retStr += content
+                else:
+                    retStr += node.get('raw', '')
             elif node['type'] == 'linebreak':
                 retStr += '\n'
+            elif node['type'] == 'softbreak':
+                # Softbreaks in inline content become spaces in HTML
+                retStr += ' '
             elif node['type'] == 'list':
                 # Convert list nodes to HTML <ul> or <ol> tags
                 retStr += self._list_to_html(node)
@@ -161,6 +223,12 @@ class MarkdownReader:
                 retStr += self._unwrap_list_to_text(node, 0)
             elif node['type'] == 'inline_html':
                 retStr += node['raw']
+            elif node['type'] == 'blank_line':
+                # Blank lines are structural; skip them in inline context
+                pass
+            elif node['type'] in ('block_code', 'code_block') or 'raw' in node:
+                # Preserve raw content (including LaTeX with backslashes)
+                retStr += node.get('raw', '')
         return retStr
 
     def _list_to_html(self, node: Dict[str, Any]) -> str:
