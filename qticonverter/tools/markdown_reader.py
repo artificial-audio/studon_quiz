@@ -29,14 +29,67 @@ class MarkdownReader:
                 self._content = f.read()
                 # Enable table plugin for markdown table support
                 md = mistune.create_markdown(renderer='ast', plugins=['table'])
-                # First protect LaTeX from hard break processing, then process inline math
-                self._content_n = self.replace_latex(self.protect_display_math(self._content))
+                # Protect ALL LaTeX (both inline and display) from mistune parsing
+                self._content_n = self.protect_latex(self._content)
                 self._ast_tree = md(self._content_n)
             logger.debug(f"Successfully parsed markdown file: {self._fname}")
         except Exception as e:
             logger.error(f"Failed to read file '{self._fname}': {e}")
             raise RuntimeError(f"Failed to read file '{self._fname}': {e}") from e
     
+    def protect_latex(self, content: str) -> str:
+        """Protect all LaTeX (inline and display) from Markdown processing.
+
+        This method protects LaTeX expressions from being parsed by mistune
+        by replacing them with HTML comment placeholders. Both inline math
+        ($...$) and display math ($$...$$) are protected.
+
+        LaTeX expressions are stored in a placeholder map and restored later
+        by _ast_to_text when processing the AST.
+
+        Args:
+            content: Markdown content possibly containing LaTeX expressions.
+
+        Returns:
+            str: Content with LaTeX protected via placeholders.
+        """
+        placeholder_map = {}
+        placeholder_idx = 0
+        result = content
+        
+        # First protect display math ($$...$$) to avoid matching inside it when looking for inline math
+        display_pattern = r'\$\$(.*?)\$\$'
+        
+        def replace_display(match):
+            nonlocal placeholder_idx
+            math_content = match.group(1)
+            placeholder = f"<!--LATEX_DISPLAY_{placeholder_idx}-->"
+            placeholder_map[placeholder] = f"$${math_content}$$"
+            placeholder_idx += 1
+            return placeholder
+        
+        result = re.sub(display_pattern, replace_display, result, flags=re.DOTALL)
+        
+        # Then protect inline math ($...$), being careful not to match display math delimiters
+        # Use negative lookbehind/lookahead for $ to avoid $$
+        inline_pattern = r'(?<!\$)\$(?!\$)(.*?)(?<!\$)\$(?!\$)'
+        
+        def replace_inline(match):
+            nonlocal placeholder_idx
+            math_content = match.group(1)
+            # Wrap the LaTeX content in a span element that will be restored later
+            placeholder = f"<!--LATEX_INLINE_{placeholder_idx}-->"
+            placeholder_map[placeholder] = f'<span class="latex">{math_content}</span>'
+            placeholder_idx += 1
+            return placeholder
+        
+        result = re.sub(inline_pattern, replace_inline, result, flags=re.DOTALL)
+        
+        # Store placeholder map for later restoration
+        self._latex_placeholder_map = placeholder_map
+        
+        return result
+
     def replace_latex(self, content: str) -> str:
         """Replace single-dollar LaTeX inline math with a span element.
 
@@ -222,7 +275,12 @@ class MarkdownReader:
             elif node['type'] == 'list_item':
                 retStr += self._unwrap_list_to_text(node, 0)
             elif node['type'] == 'inline_html':
-                retStr += node['raw']
+                content = node['raw']
+                # Restore LaTeX from HTML comment placeholders
+                if hasattr(self, '_latex_placeholder_map'):
+                    for placeholder, original in self._latex_placeholder_map.items():
+                        content = content.replace(placeholder, original)
+                retStr += content
             elif node['type'] == 'blank_line':
                 # Blank lines are structural; skip them in inline context
                 pass
