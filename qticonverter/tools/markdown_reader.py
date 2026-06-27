@@ -41,8 +41,8 @@ class MarkdownReader:
         """Protect all LaTeX (inline and display) from Markdown processing.
 
         This method protects LaTeX expressions from being parsed by mistune
-        by replacing them with HTML comment placeholders. Both inline math
-        ($...$) and display math ($$...$$) are protected.
+        by replacing them with plaintext placeholders using double-brace format
+        (e.g., {{QTILATEX_INLINE_0}}) which mistune won't special-case.
 
         LaTeX expressions are stored in a placeholder map and restored later
         by _ast_to_text when processing the AST.
@@ -63,7 +63,8 @@ class MarkdownReader:
         def replace_display(match):
             nonlocal placeholder_idx
             math_content = match.group(1)
-            placeholder = f"<!--LATEX_DISPLAY_{placeholder_idx}-->"
+            # Use double-brace placeholder that won't trigger Markdown parsing
+            placeholder = f"{{{{QTILATEX_DISPLAY_{placeholder_idx}}}}}"
             placeholder_map[placeholder] = f"$${math_content}$$"
             placeholder_idx += 1
             return placeholder
@@ -77,8 +78,8 @@ class MarkdownReader:
         def replace_inline(match):
             nonlocal placeholder_idx
             math_content = match.group(1)
-            # Wrap the LaTeX content in a span element that will be restored later
-            placeholder = f"<!--LATEX_INLINE_{placeholder_idx}-->"
+            # Use double-brace placeholder that won't trigger Markdown parsing
+            placeholder = f"{{{{QTILATEX_INLINE_{placeholder_idx}}}}}"
             placeholder_map[placeholder] = f'<span class="latex">{math_content}</span>'
             placeholder_idx += 1
             return placeholder
@@ -88,6 +89,7 @@ class MarkdownReader:
         # Store placeholder map for later restoration
         self._latex_placeholder_map = placeholder_map
         
+        return result
         return result
 
     def replace_latex(self, content: str) -> str:
@@ -105,45 +107,6 @@ class MarkdownReader:
             str: Transformed content with inline LaTeX wrapped in a span.
         """
         return re.sub(r'(?<!\$)\$(?!\$)(.*?)(?<!\$)\$', r'<span class="latex">\1</span>', content)
-
-    def protect_display_math(self, content: str) -> str:
-        """Protect LaTeX line breaks in display math from Markdown hard break processing.
-
-        Mistune treats `\\` at end of line as a Markdown hard break marker and
-        consumes one backslash. In LaTeX math, `\\` is literal and should be
-        preserved. This method uses a different approach: wrap display math
-        blocks in HTML comment markers so mistune treats them as raw content.
-
-        Args:
-            content: Markdown content with display math blocks.
-
-        Returns:
-            str: Content with display math protected from Markdown processing.
-        """
-        # Strategy: Temporarily replace display math with HTML comments containing the original
-        # This prevents mistune from parsing the inside of display math
-        placeholder_map = {}
-        placeholder_idx = 0
-        result = content
-        
-        # Find and protect all $$...$$ blocks
-        pattern = r'\$\$(.*?)\$\$'
-        
-        def replace_with_placeholder(match):
-            nonlocal placeholder_idx
-            math_content = match.group(1)
-            # Use HTML comment-style placeholder that mistune won't parse
-            placeholder = f"<!--LATEX_MATH_{placeholder_idx}-->"
-            placeholder_map[placeholder] = f"$${math_content}$$"
-            placeholder_idx += 1
-            return placeholder
-        
-        result = re.sub(pattern, replace_with_placeholder, result, flags=re.DOTALL)
-        
-        # Store placeholder map for later restoration
-        self._latex_placeholder_map = placeholder_map
-        
-        return result
 
     def get_attrs(self) -> Dict[str, str]:
         """Extract leading key:value attributes from the top of the file.
@@ -217,7 +180,11 @@ class MarkdownReader:
             if start_recording:
                 try:
                     if element['type'] == 'blank_line':
-                        content.append({'type': 'linebreak'})
+                        # Skip blank lines between paragraphs - they're structural
+                        pass
+                    elif element['type'] == 'paragraph':
+                        # Preserve paragraph as a separate element to maintain boundaries
+                        content.append(element)
                     elif element['type'] == 'list':
                         # Append list node itself so it can be converted to HTML by _list_to_html()
                         content.append(element)
@@ -234,11 +201,15 @@ class MarkdownReader:
     def _ast_to_text(self, ast_nodes: List[Dict[str, Any]]) -> str:
         """Convert a list of AST nodes into HTML text.
 
-        Supports text nodes, line breaks, lists, inline HTML, softbreaks, and raw content.
-        Lists are converted to proper <ul> or <ol> HTML tags to match
-        ILIAS QTI format expectations.
+        Supports text nodes, line breaks, lists, paragraphs, emphasis/strong nodes,
+        inline HTML, softbreaks, and raw content. Lists are converted to proper 
+        <ul> or <ol> HTML tags to match ILIAS QTI format expectations.
+        Paragraphs are wrapped in <p> tags to preserve paragraph boundaries.
 
-        Restores display math from protected HTML comment placeholders.
+        Strong and emphasis nodes that contain LaTeX placeholders are
+        unwrapped (without markup) to restore the placeholder content.
+
+        Restores display math from protected placeholder format ({{QTILATEX_*}}).
 
         Args:
             ast_nodes: A list of nodes produced by the `mistune` AST renderer.
@@ -250,13 +221,23 @@ class MarkdownReader:
         for node in ast_nodes:
             if node['type'] == 'text':
                 content = node['raw']
-                # Restore LaTeX from HTML comment placeholders
+                # Restore LaTeX from placeholder format
                 if hasattr(self, '_latex_placeholder_map'):
                     for placeholder, original in self._latex_placeholder_map.items():
                         content = content.replace(placeholder, original)
                 retStr += content
+            elif node['type'] == 'paragraph':
+                # Wrap paragraph content in <p> tags to preserve paragraph boundaries
+                if 'children' in node:
+                    para_content = self._ast_to_text(node['children'])
+                    retStr += f'<p>{para_content}</p>\n'
+            elif node['type'] in ('strong', 'emphasis', 'em'):
+                # Strong/emphasis nodes might contain LaTeX placeholders (when __text__ got escaped).
+                # Just process their children without adding markup.
+                if 'children' in node:
+                    retStr += self._ast_to_text(node['children'])
             elif node['type'] == 'block_html':
-                # Restore display math from HTML comment blocks
+                # Restore display math from placeholder format
                 if hasattr(self, '_latex_placeholder_map'):
                     content = node['raw']
                     for placeholder, original in self._latex_placeholder_map.items():
@@ -276,7 +257,7 @@ class MarkdownReader:
                 retStr += self._unwrap_list_to_text(node, 0)
             elif node['type'] == 'inline_html':
                 content = node['raw']
-                # Restore LaTeX from HTML comment placeholders
+                # Restore LaTeX from placeholder format
                 if hasattr(self, '_latex_placeholder_map'):
                     for placeholder, original in self._latex_placeholder_map.items():
                         content = content.replace(placeholder, original)
@@ -729,9 +710,9 @@ def replace_obsidian_images(text):
     - `filename.ext|width`
     - `filename.ext|widthxheight`
 
-    The function generates a randomized `src` identifier and returns an
-    HTML paragraph containing an `<img>` element with `title`, `src`,
-    `width` and `height` attributes.
+    The function generates a randomized `src` identifier and returns
+    HTML `<img>` element (without wrapping <p> tags, as the caller
+    will handle paragraph formatting).
 
     Args:
         text: Input text potentially containing Obsidian-style image links.
@@ -766,7 +747,9 @@ def replace_obsidian_images(text):
         random_num = random.randint(10000, 99999)
         new_src = f"{random_num}_mob_{random_num}"
         
-        return f'<p><img alt="" height="{height}" src="il_{new_src}" title="{filename}" width="{width}" /></p>'
+        # Return just the img tag without wrapping <p> tags
+        # The caller will handle paragraph formatting
+        return f'<img alt="" height="{height}" src="il_{new_src}" title="{filename}" width="{width}" />'
 
     pattern = r'!\[\[([^\]]+?)\]\]'
     

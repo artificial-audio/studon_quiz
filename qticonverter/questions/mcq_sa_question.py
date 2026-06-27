@@ -177,7 +177,12 @@ class McqSAQuestion(Question):
         material = etree.SubElement(flow, "material")
         mattext = etree.SubElement(material, "mattext", texttype="text/xhtml")
         problem_statement = self.get_problem_statement()
-        mattext.text = f"<p>{problem_statement}</p>"
+        # Check if problem statement already contains <p> tags (from markdown parsing)
+        # If not, wrap it in a paragraph tag for consistency
+        if problem_statement and '<p>' in problem_statement:
+            mattext.text = problem_statement
+        else:
+            mattext.text = f"<p>{problem_statement}</p>"
         
         # Extract image references from problem statement with dimensions
         images = self._extract_images_with_dimensions(problem_statement)
