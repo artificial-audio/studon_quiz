@@ -5,6 +5,17 @@ All notable changes to the QTIConverter project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-06-29
+
+### Updates
+- New question types added: essay and numerical. The README has been updated with detailed installation and usage instructions, including a section on reporting issues with guidelines for bug reports and feature requests.
+- Program name changed from QTIConverter to studon_quiz to better reflect its purpose and functionality.
+- Updated README with detailed installation and usage instructions
+- Added reporting issues section with guidelines for bug reports and feature requests
+- Better support for Markdown formatting, including handling of special characters and symbols
+
+
+
 ## [0.1.0] - 2026-03-09
 
 ### Initial Release
