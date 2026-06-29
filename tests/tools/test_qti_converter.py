@@ -1,13 +1,13 @@
 # Copyright (c) 2026 Friedrich-Alexander-Universität Erlangen-Nürnberg
 # SPDX-License-Identifier: MIT
 
-from qticonverter.tools.qti_converter import QtiConverter
+from studon_quiz.tools.qti_converter import studon_quiz
 from pathlib import Path
 
 
 def test_qti_converter_save_package(tmp_path: Path):
     output_file_path = tmp_path / "output"
-    converter = QtiConverter()
+    converter = studon_quiz()
     
     question_text = "What is the capital of France?"
     choices_list = ["Berlin", "Madrid", "Paris"]

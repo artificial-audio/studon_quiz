@@ -3,8 +3,8 @@
 
 import pytest
 from lxml import etree
-from qticonverter.questions.mcq_sa_question import McqSAQuestion  # replace with actual path
-from qticonverter.questions.qti_writer import QTIWriter  # replace with actual path
+from studon_quiz.questions.mcq_sa_question import McqSAQuestion  # replace with actual path
+from studon_quiz.questions.qti_writer import QTIWriter  # replace with actual path
 import os
 
 def create_sample_question():

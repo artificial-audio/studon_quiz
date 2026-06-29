@@ -9,7 +9,7 @@ output path.
 """
 
 import pathlib
-from qticonverter.questions.question_bank import QuestionBank
+from studon_quiz.questions.question_bank import QuestionBank
 
 
 class SingleQuestionConversionService:

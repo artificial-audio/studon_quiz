@@ -5,7 +5,7 @@ from lxml import etree
 import zipfile
 from pathlib import Path
 import re
-from qticonverter.questions.qti_helpers import QTIImageExtractor, QTIImageLocator
+from studon_quiz.questions.qti_helpers import QTIImageExtractor, QTIImageLocator
 
 
 

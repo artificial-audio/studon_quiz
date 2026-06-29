@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 import pytest
-from qticonverter.questions.mcq_sa_question import McqSAQuestion  # replace with the actual module name
+from studon_quiz.questions.mcq_sa_question import McqSAQuestion  # replace with the actual module name
 
 def test_initial_state():
     q = McqSAQuestion()

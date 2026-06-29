@@ -5,7 +5,7 @@ from qti_package_maker.package_interface import QTIPackageInterface
 from pathlib import Path
 
 
-class QtiConverter:
+class studon_quiz:
     """Lightweight wrapper around the QTIPackageInterface used in tests.
 
     The class provides a small convenience API to create and persist a
@@ -14,7 +14,7 @@ class QtiConverter:
     """
 
     def __init__(self):
-        """Create a `QtiConverter` instance and initialize the packer.
+        """Create a `studon_quiz` instance and initialize the packer.
 
         The underlying `QTIPackageInterface` is instantiated with
         example defaults that are suitable for local testing.

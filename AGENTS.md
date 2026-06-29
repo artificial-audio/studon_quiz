@@ -20,9 +20,9 @@ To ensure reliable and context-aware operation, always populate the directory st
 
 ---
 ### Temp Folder Usage
-- When converting quizzes or using any qticonverter tools, always perform these actions inside the `temp` folder.
+- When converting quizzes or using any studon_quiz tools, always perform these actions inside the `temp` folder.
 - All files for testing and experimentation should be created and managed within the `temp` directory to keep the workspace organized and isolated from production files.
 
 
 ### Workflow Principles
-These points capture the non-obvious, repo-specific workflow needed for reliable use of **QTIConverter**.
+These points capture the non-obvious, repo-specific workflow needed for reliable use of **studon_quiz**.

@@ -7,3 +7,4 @@ temp/
 !.gitignore
 /VAL
 /StoPro
+!studon_quiz/

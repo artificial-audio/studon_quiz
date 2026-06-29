@@ -3,7 +3,7 @@
 
 import pytest
 from lxml import etree
-from qticonverter.questions.numeric_question import NumericQuestion
+from studon_quiz.questions.numeric_question import NumericQuestion
 
 
 def test_initial_state():

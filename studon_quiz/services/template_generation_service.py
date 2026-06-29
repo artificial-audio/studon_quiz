@@ -24,19 +24,19 @@ class TemplateGenerationService:
     """
     _questionTemplates = {
         "mcq-sa": {
-            "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-sa.md",
-            "resources": [pkg_resources.files("qticonverter") / "markdown_template/images/signal_plot.png" ]
+            "template": pkg_resources.files("studon_quiz") / "markdown_template/mcq-sa.md",
+            "resources": [pkg_resources.files("studon_quiz") / "markdown_template/images/signal_plot.png" ]
         },
         "mcq-ma": {
-            "template": pkg_resources.files("qticonverter") / "markdown_template/mcq-ma.md",
-            "resources": [pkg_resources.files("qticonverter") / "markdown_template/images/signal_plot.png" ]
+            "template": pkg_resources.files("studon_quiz") / "markdown_template/mcq-ma.md",
+            "resources": [pkg_resources.files("studon_quiz") / "markdown_template/images/signal_plot.png" ]
         },
         "num": {
-            "template": pkg_resources.files("qticonverter") / "markdown_template/num.md",
+            "template": pkg_resources.files("studon_quiz") / "markdown_template/num.md",
             "resources": []
         },
         "essay": {
-            "template": pkg_resources.files("qticonverter") / "markdown_template/essay.md",
+            "template": pkg_resources.files("studon_quiz") / "markdown_template/essay.md",
             "resources": []
         }
     }

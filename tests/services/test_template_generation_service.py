@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Friedrich-Alexander-Universität Erlangen-Nürnberg
 # SPDX-License-Identifier: MIT
 
-from qticonverter.services.template_generation_service import TemplateGenerationService
+from studon_quiz.services.template_generation_service import TemplateGenerationService
 from pathlib import Path 
 
 def test_template_generation_mcq_sa(tmp_path: Path) -> None:

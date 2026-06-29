@@ -10,7 +10,7 @@ QTI package saved at the provided output path.
 
 from pathlib import Path
 from typing import List, Optional
-from qticonverter.questions.question_bank import QuestionBank
+from studon_quiz.questions.question_bank import QuestionBank
 
 
 class FolderConversionService:

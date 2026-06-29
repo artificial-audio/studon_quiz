@@ -1,10 +1,10 @@
-# QTIConverter
+# studon_quiz
 
 Convert Markdown questions into ILIAS-compatible QTI packages.
 
 ## Installation Guide
 
-To install and set up the QTIConverter project after downloading it from GitHub, follow these steps:
+To install and set up the studon_quiz project after downloading it from GitHub, follow these steps:
 
 ### Prerequisites
 Ensure you have the following installed:
@@ -15,7 +15,7 @@ Ensure you have the following installed:
 1. **Clone the repository**:
     ```bash
     git clone https://github.com/artificial-audio/studon_quiz.git
-    cd QTIConverter
+    cd studon_quiz
     ```
 
 2. **Install dependencies**:
@@ -32,16 +32,16 @@ Ensure you have the following installed:
 4. **Verify installation**:
     Run the following command to ensure the tool is installed correctly:
     ```bash
-    qticonverter --help
+    studon_quiz --help
     ```
 
-You are now ready to use QTIConverter!
+You are now ready to use studon_quiz!
 
 ## Quick Start
 
 ### Generate templates
 ```bash
-qticonverter generate-template --name demosa.md --folder templates/ --q_type mcq-sa
+studon_quiz generate-template --name demosa.md --folder templates/ --q_type mcq-sa
 ```
 This command generates a template file named `demosa.md` in the `templates/` output folder for the `mcq-sa` question type.
 
@@ -55,7 +55,7 @@ Edit the files using Obsidian or any Markdown editor, then convert them to QTI p
 To convert all Markdown files in a folder to a single QTI package, use the following command:
 
 ```bash
-qticonverter convert-folder --input . --output demo_new.zip
+studon_quiz convert-folder --input . --output demo_new.zip
 ```
 
 This will process all Markdown files in the current directory and generate a QTI package named `demo_new.zip`.
@@ -64,7 +64,7 @@ This will process all Markdown files in the current directory and generate a QTI
 To convert a single Markdown question file to a QTI package, use the following command:
 
 ```bash
-qticonverter convert-single --input question.md --output question.zip
+studon_quiz convert-single --input question.md --output question.zip
 ```
 
 This will create a QTI package named `question.zip` from the specified `question.md` file.

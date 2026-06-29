@@ -3,7 +3,7 @@
 
 from pathlib import Path
 from click.testing import CliRunner
-from qticonverter.cli.cli_handler import cli
+from studon_quiz.cli.cli_handler import cli
 from unittest.mock import patch
 import pytest
 
@@ -25,7 +25,7 @@ def create_mulitple_template_file(tmp_path):
 
 def test_generate_template_service_call() -> None:
     runner = CliRunner()
-    with patch("qticonverter.cli.cli_handler.TemplateGenerationService",autospec=True) as MockClass:
+    with patch("studon_quiz.cli.cli_handler.TemplateGenerationService",autospec=True) as MockClass:
         instance = MockClass.return_value
         result = runner.invoke(cli, ["generate-template", "--name","test.md","--q_type", "mcq-sa", "--folder", "."])
         MockClass.assert_called_with(f_name=Path.cwd().joinpath('test.md').resolve(),q_type='mcq-sa')
@@ -46,7 +46,7 @@ def test_convert_single_service_call(tmp_path: Path) -> None:
     outputFile = tmp_path/'output.xml'
     inputFile.write_text("# Sample Question\nThis is a sample question.")
     
-    with patch("qticonverter.cli.cli_handler.SingleQuestionConversionService",autospec=True) as MockClass:
+    with patch("studon_quiz.cli.cli_handler.SingleQuestionConversionService",autospec=True) as MockClass:
         instance = MockClass.return_value
         result = runner.invoke(cli, ["convert-single", "--input", str(inputFile), "--output", str(outputFile)])
         MockClass.assert_called_with(input_file=inputFile, output_file=outputFile)

@@ -6,9 +6,9 @@ from .mcq_sa_question import McqSAQuestion
 from .mcq_ma_question import McqMAQuestion
 from .numeric_question import NumericQuestion
 from .essay_question import EssayQuestion
-from qticonverter.tools.qti_converter import QtiConverter
-from qticonverter.tools.markdown_reader import MarkdownReader
-from qticonverter.questions.qti_writer import QTIWriter
+from studon_quiz.tools.qti_converter import studon_quiz
+from studon_quiz.tools.markdown_reader import MarkdownReader
+from studon_quiz.questions.qti_writer import QTIWriter
 import pathlib
 
 
@@ -24,7 +24,7 @@ class QuestionBank:
     ----------
     questions : list
         List of Question objects managed by this bank.
-    converter : QtiConverter
+    converter : studon_quiz
         Test converter instance initialized at singleton creation.
     """
     question_type_abbr = [
@@ -35,13 +35,13 @@ class QuestionBank:
     ]
     _instance = None
     questions = []
-    converter: QtiConverter = None
+    converter: studon_quiz = None
     
 
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
-            cls._instance.converter = QtiConverter()
+            cls._instance.converter = studon_quiz()
         return cls._instance
     
     def add_question(self, input_file: pathlib.Path):

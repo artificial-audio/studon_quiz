@@ -3,7 +3,7 @@
 
 import re
 from lxml import etree
-from qticonverter.questions.question import Question
+from studon_quiz.questions.question import Question
 
 
 class McqSAQuestion(Question):

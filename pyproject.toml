@@ -1,5 +1,5 @@
 [project]
-name = "qticonverter"
+name = "studon_quiz"
 version = "0.1.0"
 description = ""
 authors = [
@@ -16,13 +16,13 @@ dependencies = [
 ]
 
 [tool.poetry.scripts]
-qticonverter = "qticonverter.cli.cli_handler:cli"
+studon_quiz = "studon_quiz.cli.cli_handler:cli"
 
 [tool.poetry.dependencies]
 qti-package-maker = {allow-prereleases = true}
 
 [tool.poetry]
-include = ["qticonverter/markdown_template/*.md"]
+include = ["studon_quiz/markdown_template/*.md"]
 
 
 [tool.pytest]

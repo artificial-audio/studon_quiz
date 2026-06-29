@@ -3,7 +3,7 @@
 
 import pytest
 from lxml import etree
-from qticonverter.questions.essay_question import EssayQuestion
+from studon_quiz.questions.essay_question import EssayQuestion
 
 
 def test_initial_state():
