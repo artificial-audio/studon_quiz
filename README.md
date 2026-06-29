@@ -66,6 +66,20 @@ poetry run studon_quiz convert-single --input question.md --output question.zip
 
 This will create a QTI package named `question.zip` from the specified `question.md` file.
 
+## Reporting Issues
+
+If you encounter a bug, unexpected behavior, or have a feature request, please use the [GitHub Issues](https://github.com/artificial-audio/studon_quiz/issues) page.
+
+Before creating a new issue, please check whether a similar issue already exists.
+
+When reporting a bug, include:
+- A clear description of the problem.
+- Steps to reproduce the issue.
+- The command you ran.
+- The full error message or stack trace.
+- Your operating system and Python version.
+- A sample Markdown file, if applicable (after removing any sensitive information).
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
