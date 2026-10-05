@@ -578,11 +578,11 @@ class MarkdownReader:
             if child['type'] in ('block_text', 'paragraph'):
                 try:
                     if tabCount == 0:
-                        dictData['ans'] = ''.join(c['raw'] for c in child['children'] if 'raw' in c)
+                        dictData['ans'] = self._ast_to_text(child['children'])  # restores protected LaTeX
                         dictData['ans'] = replace_obsidian_images(dictData['ans'])
                     else:
                         # Extract all raw text from all children (handles LaTeX and inline HTML)
-                        full_text = ''.join(c['raw'] for c in child['children'] if 'raw' in c)
+                        full_text = self._ast_to_text(child['children'])  # restores protected LaTeX
                         attr_text = full_text.split(':', 1)  # Split only on first colon
                         if len(attr_text) == 2:
                             dictData[attr_text[0].lstrip()] = attr_text[1].lstrip()
