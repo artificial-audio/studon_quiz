@@ -50,6 +50,7 @@ def cli():
 question_type_abbr = [
     "mcq-sa",   # multiple choice (single answer)
     "mcq-ma",   # multiple choice (multiple answers)
+    "kprim",    # Kprim: four statements, each true/false
     "num",      # numeric question
     "essay",     # essay/free-text question
 ]
