@@ -4,6 +4,7 @@
 from loguru import logger
 from .mcq_sa_question import McqSAQuestion
 from .mcq_ma_question import McqMAQuestion
+from .kprim_question import KprimQuestion
 from .numeric_question import NumericQuestion
 from .essay_question import EssayQuestion
 from studon_quiz.tools.qti_converter import studon_quiz
@@ -30,6 +31,7 @@ class QuestionBank:
     question_type_abbr = [
         "mcq-sa",   # multiple choice (single answer)
         "mcq-ma",   # multiple choice (multiple answers)
+        "kprim",    # Kprim: four statements, each true/false
         "num",      # numeric question
         "essay",     # free-text/essay question
     ]
@@ -86,6 +88,8 @@ class QuestionBank:
         logger.info("Loaded question attributes: {}", question)
         if question['type'] == 'mcq-sa' or question['type'] == 'mcq-ma':
             self._add_mcq_question(question)
+        elif question['type'] == 'kprim':
+            self._add_kprim_question(question, attr)
         elif question['type'] == 'num':
             self._add_numeric_question(question)
         elif question['type'] == 'essay':
@@ -124,6 +128,30 @@ class QuestionBank:
             q.set_feedback(question['feedback'])
             q.set_hint(question['hint'])
             self.questions.append(q)
+
+    def _add_kprim_question(self, question: dict, attr: dict):
+        """Helper to instantiate and add a Kprim question to the bank.
+
+        Options use the MCQ list/table format; a positive score marks a true
+        statement. Optional front matter: ``points`` (default 1) and
+        ``partial_scoring`` (default 1: three of four right give half points).
+
+        Raises:
+            ValueError: If the question does not have exactly four options.
+        """
+        options = [{"text": o['ans'], "score": float(o['Score']), "feedback": o.get('Remark', '')}
+                   for o in question['options']]
+        if len(options) != KprimQuestion.NUM_ANSWERS:
+            raise ValueError(f"Kprim question '{question['title']}' needs exactly 4 options, got {len(options)}")
+        q = KprimQuestion(points=float(attr.get('points', 1)),
+                          partial_scoring=str(attr.get('partial_scoring', '1')).strip() not in ('0', 'false', 'no'))
+        q.set_title(title=question['title'])
+        q.set_problem_statement(question['problem_statement'])
+        q.set_options(options)
+        q.set_summary(question['summary'])
+        q.set_feedback(question['feedback'])
+        q.set_hint(question['hint'])
+        self.questions.append(q)
 
     def _add_numeric_question(self, question: dict):
         """Helper to instantiate and add a numeric question to the bank.

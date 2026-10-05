@@ -31,6 +31,10 @@ class TemplateGenerationService:
             "template": pkg_resources.files("studon_quiz") / "markdown_template/mcq-ma.md",
             "resources": [pkg_resources.files("studon_quiz") / "markdown_template/images/signal_plot.png" ]
         },
+        "kprim": {
+            "template": pkg_resources.files("studon_quiz") / "markdown_template/kprim.md",
+            "resources": []
+        },
         "num": {
             "template": pkg_resources.files("studon_quiz") / "markdown_template/num.md",
             "resources": []

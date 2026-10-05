@@ -43,6 +43,7 @@ This command generates a template file named `demosa.md` in the `templates/` out
 #### Allowed question types:
 - mcq-sa (Multiple Choice Question - Single Answer)
 - mcq-ma (Multiple Choice Question - Multiple Answers)
+- kprim (Kprim Choice - exactly four statements, each judged true or false)
 - essay (Essay Question)
 - num (Numerical Question)
 
