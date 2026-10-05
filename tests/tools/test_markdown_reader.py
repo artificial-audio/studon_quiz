@@ -67,6 +67,15 @@ def test_markdown_reader_get_options() -> None:
     statement = reader.get_options()
     assert type(statement) == list
 
+def test_markdown_reader_list_options_keep_latex(tmp_path) -> None:
+    # List-format options and remarks must get their protected LaTeX back.
+    md = tmp_path / "q.md"
+    md.write_text("type: mcq-ma\n\n# T\nd\n\n## Quiz\n\nStem $a$\n\n## Options\n\n"
+                  "- Option $x^2$\n\t- Score: 1\n\t- Remark: Because $y$.\n")
+    opt = MarkdownReader(str(md)).get_options()[0]
+    assert "QTILATEX" not in opt["ans"] + opt["Remark"]
+    assert "x^2" in opt["ans"] and "y" in opt["Remark"]
+
 def test_markdown_reader_get_feedback() -> None:
     file = pkg_resources.files("studon_quiz")/"markdown_template/mcq-sa.md"
     reader = MarkdownReader(str(file))
